@@ -10,14 +10,14 @@ class Event < ApplicationRecord
   # end
   # after_validation :reverse_geocode
 
-  has_many :user_events
+  has_many :user_events, dependent: :destroy
   has_many :users, through: :user_events
-  has_many :circle_events
+  has_many :circle_events, dependent: :destroy
   has_many :circles, through: :circle_events
   has_many :event_messages, dependent: :destroy
   has_many_attached :photos
   has_many_attached :images
-  has_many :event_playlists
+  has_many :event_playlists, dependent: :destroy
   has_many :payments, through: :user_events
 
   validates :title, presence: true
