@@ -33,6 +33,7 @@
       </div>
       <% end %>
       <% if user_signed_in? %>
+        <div class="spacer"></div>
         <%= link_to "New Circle", new_circle_path, class: "hover-underline-animation" %>
         <%= link_to "New Event", new_event_path, class: "hover-underline-animation" %>
       <% end %>

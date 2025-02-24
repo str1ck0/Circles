@@ -6,7 +6,7 @@
     "@hotwired/turbo-rails": "^7.2.4",
     "@mapbox/mapbox-gl-geocoder": "^5.0.1",
     "@popperjs/core": "^2.11.6",
-    "@rails/actioncable": "^7.0.4",
+    "@rails/actioncable": "^7.0.4-3",
     "@splidejs/splide": "^4.1.4",
     "@splidejs/splide-extension-auto-scroll": "^0.5.3",
     "@splidejs/splide-extension-intersection": "^0.2.0",
