@@ -1,0 +1,32 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Postgres is hosted on Neon and Redis on Upstash (both free), so this only
+# defines the web service. Secret values (marked `sync: false`) are entered in
+# the Render dashboard, not committed here.
+services:
+  - type: web
+    name: circles
+    runtime: ruby
+    plan: free
+    region: frankfurt
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    healthCheckPath: /users/sign_in
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: SECRET_KEY_BASE
+        generateValue: true      # Render generates a secure random value
+      - key: DATABASE_URL         # Neon connection string
+        sync: false
+      - key: REDIS_URL            # Upstash connection string (rediss://...)
+        sync: false
+      - key: CLOUDINARY_URL       # cloudinary://key:secret@cloud_name
+        sync: false
+      - key: MAPBOX_API_KEY
+        sync: false
+      - key: APP_HOST             # e.g. circles.onrender.com
+        sync: false

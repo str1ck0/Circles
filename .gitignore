@@ -40,3 +40,5 @@
 *.swp
 .DS_Store
 .env*
+# ...but keep the committed example that documents required vars.
+!.env.example

@@ -2,12 +2,13 @@ class DashboardController < ApplicationController
   def show
     @user = User.find(params[:id])
     @all_events = Event.all
-    @events = Event.where(user_id: @user)
-    @event = @events[0]
-    @circles = Circle.all
-    @circle = @circles[0]
+    @events = @user.events
+    @event = @events.first
+    @circles = @user.circles
+    @circle = @circles.first
     @circle_playlist = CirclePlaylist.new
-    @user_event = UserEvent.last
-    @next_event = Event.find(@user_event.event_id)
+    # The user's next upcoming event they're attending (guard against having none).
+    @next_event = @user.events.where("end_date >= ?", Date.current).order(:start_date).first ||
+                  @user.events.order(:start_date).last
   end
 end

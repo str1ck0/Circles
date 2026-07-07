@@ -17,8 +17,6 @@ class UserCirclesController < ApplicationController
 
   private
 
-  { user_circle: { user_id: 3 } }
-
   def user_circle_params
     params.require(:user_circle).permit(:user_id)
   end

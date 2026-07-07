@@ -12,10 +12,10 @@
       <% if user_signed_in? %>
         <div class="profile-container">
           <%= link_to dashboard_path(current_user) do %>
-            <% if current_user.photo.key? %>
-              <%= cl_image_tag current_user.photo.key, class: "circle-avatar"%>
+            <% if current_user.photo.attached? %>
+              <%= image_tag current_user.photo, class: "circle-avatar" %>
             <% else %>
-              <%= cl_image_tag "hk6soz418q50zk89hkppwut8mp97", class: "circle-avatar", alt: "circle-avatar" %>
+              <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: "circle-avatar" %>
             <% end %>
           <% end %>
         </div>
@@ -47,10 +47,10 @@
       <div class="circle-grid">
         <% @circles.each do |circle|%>
           <%= link_to circle_path(circle) do %>
-            <% if circle.photo.key? %>
-              <%= cl_image_tag circle.photo.key, class: "circle-avatar", :style => "border-color: #{circle.border_color}", alt: "Circle Avatar" %>
+            <% if circle.photo.attached? %>
+              <%= image_tag circle.photo, class: "circle-avatar", style: "border-color: #{circle.border_color}", alt: "Circle Avatar" %>
             <% else %>
-              <%= cl_image_tag "hk6soz418q50zk89hkppwut8mp97", class: "circle-avatar", alt: "circle-avatar" %>
+              <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: "circle-avatar" %>
             <% end %>
           <% end %>
         <% end %>

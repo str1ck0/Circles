@@ -8,17 +8,14 @@ class EventsController < ApplicationController
   def create
     @event = Event.new(event_params)
     @event.user = current_user
-    @event.private = params[:event][:private][1]
     if @event.save
-      circle = @event.circle_events.first.circle
-      UserEvent.create(event: @event, user: current_user)
-      circle.users.each do |user|
-        user_event = UserEvent.new(event: @event, user: user)
-        user_event.save!
-      end
+      # Attendees = the creator plus everyone in the circles this event belongs to.
+      attendees = ([current_user] + @event.circles.flat_map(&:users)).uniq
+      attendees.each { |user| UserEvent.find_or_create_by(event: @event, user: user) }
       redirect_to event_path(@event), notice: "Event created!"
     else
-      redirect_to root_path, notice: "Event not created, please try again"
+      @circles = Circle.all
+      render :new, status: :unprocessable_entity
     end
   end
 

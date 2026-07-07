@@ -1,11 +1,9 @@
 class EventPlaylist < ApplicationRecord
   belongs_to :event
 
+  # Extract the Spotify playlist ID from a share URL, tolerating URLs with or
+  # without a query string (e.g. ".../playlist/ID" or ".../playlist/ID?si=...").
   def embed_url
-    user_url = self.url
-    regex = /\/(\w*)\?/
-    match_data = regex.match(user_url)
-    inner_url = match_data[1]
-    return inner_url
+    url.to_s[%r{playlist/(\w+)}, 1] || url.to_s.split("?").first.split("/").last
   end
 end

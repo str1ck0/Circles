@@ -1,5 +1,6 @@
 class Circle < ApplicationRecord
-  has_many :circle_events
+  belongs_to :owner, class_name: "User", optional: true
+  has_many :circle_events, dependent: :destroy
   has_many :events, through: :circle_events
   has_many :user_circles, dependent: :destroy
   has_many :users, through: :user_circles

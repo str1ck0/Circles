@@ -1,420 +1,237 @@
-puts "> Clearing the DB.."
+require "open-uri"
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+COLORS = %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff
+            #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].freeze
+
+FALLBACK_IMAGE = Rails.root.join("app/assets/images/avatar/CirclesAvatar.png")
+
+# Attach a remote image to a record's attachment. If the download fails for any
+# reason we fall back to a bundled image so presence validations still pass and
+# seeding never dies halfway through.
+def attach_image(record, attachment, url, filename: "image.png", content_type: "image/png")
+  file = URI.parse(url).open
+  record.public_send(attachment).attach(io: file, filename: filename, content_type: content_type)
+rescue StandardError => e
+  puts "  [fallback] #{url} → #{e.class}: #{e.message}"
+  record.public_send(attachment).attach(
+    io: File.open(FALLBACK_IMAGE), filename: "fallback.png", content_type: "image/png"
+  )
+end
+
+def avatar_url(index)
+  "https://i.pravatar.cc/300?img=#{(index % 70) + 1}"
+end
+
+# ---------------------------------------------------------------------------
+# Clear
+# ---------------------------------------------------------------------------
+
+puts "> Clearing the DB.."
 Splittee.destroy_all
 Payment.destroy_all
 EventPlaylist.destroy_all
 CirclePlaylist.destroy_all
 CircleEvent.destroy_all
-
 UserEvent.destroy_all
 EventMessage.destroy_all
-
 UserCircle.destroy_all
 CircleMessage.destroy_all
-
 Event.destroy_all
 Circle.destroy_all
 User.destroy_all
 
+# ---------------------------------------------------------------------------
+# Users
+# ---------------------------------------------------------------------------
+
 puts "> Creating the main character..."
+main_user = User.create!(
+  email: "benten@gmail.com", password: "password",
+  username: "benten", first_name: "Liam", last_name: "Strickland"
+)
+attach_image(main_user, :photo, avatar_url(0))
 
-main_user = User.create(email: 'benten@gmail.com', password: 'password', username: 'benten', first_name: 'Liam', last_name: 'Strickland')
-user_url = "https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668763249/development/waverock2_dglnlh.jpg"
-user_file = URI.open(user_url)
-main_user.photo.attach(io: user_file, filename: 'circle_img.png', content_type: 'image/png')
-
-puts "> Creating male users"
-
-30.times do
-  user = User.new(
-    email: Faker::Internet.email,
-    password: 'password',
-    username: Faker::Internet.username,
-    first_name: Faker::Name.male_first_name,
+puts "> Creating other users..."
+users = [main_user]
+60.times do |i|
+  male = i.even?
+  user = User.create!(
+    email: Faker::Internet.unique.email,
+    password: "password",
+    username: Faker::Internet.unique.username(specifier: 5..12),
+    first_name: male ? Faker::Name.male_first_name : Faker::Name.female_first_name,
     last_name: Faker::Name.last_name
   )
-  user.save
-  male_user_avatar_url = "https://xsgames.co/randomusers/avatar.php?g=male"
-  male_user_avatar_file = URI.open(male_user_avatar_url)
-  user.photo.attach(io: male_user_avatar_file, filename: 'user_avatar.png', content_type: 'image/png')
+  attach_image(user, :photo, avatar_url(i + 1))
+  users << user
 end
+puts "  created #{User.count} users"
 
-puts "> Creating female users"
+# ---------------------------------------------------------------------------
+# Circles
+# ---------------------------------------------------------------------------
 
-30.times do
-  user = User.new(
-    email: Faker::Internet.email,
-    password: 'password',
-    username: Faker::Internet.username,
-    first_name: Faker::Name.female_first_name,
-    last_name: Faker::Name.last_name
+puts "> Creating circles..."
+
+circle_data = [
+  { name: "Family 🧡", private: true, members: 5,
+    photo: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80" },
+  { name: "Miami Bulls 🏀", private: true, members: 12,
+    photo: "https://images.unsplash.com/photo-1515523110800-9415d13b84a8?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80" },
+  { name: "The Office 💻", private: false, members: 10,
+    photo: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80" },
+  { name: "The Day Ones 💯", private: true, members: 6,
+    photo: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1475483768296-6163e08872a1?auto=format&fit=crop&w=1600&q=80" },
+  { name: "Le Wagon Crew 🤓", private: true, members: 14,
+    photo: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80" },
+  { name: "Chess Club ♟️", private: true, members: 7,
+    photo: "https://images.unsplash.com/photo-1529699310859-b163e33e4556?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?auto=format&fit=crop&w=1600&q=80" },
+  { name: "Footy Lads 🍻", private: true, members: 18,
+    photo: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1600&q=80" },
+  { name: "World Class Ravers 🎧", private: true, members: 9,
+    photo: "https://images.unsplash.com/photo-1637561930888-dfedf87bf609?auto=format&fit=crop&w=800&q=80",
+    banner: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80" }
+]
+
+circles = circle_data.map do |data|
+  circle = Circle.new(name: data[:name], private: data[:private],
+                      border_color: COLORS.sample, owner: main_user)
+  attach_image(circle, :photo, data[:photo])
+  attach_image(circle, :banner, data[:banner])
+  circle.save!
+
+  # Main user is always a member; fill the rest with random distinct users.
+  members = ([main_user] + users.sample(data[:members])).uniq.first(data[:members] + 1)
+  members.each { |user| UserCircle.find_or_create_by!(user: user, circle: circle) }
+  print "."
+  circle
+end
+puts "\n  created #{Circle.count} circles"
+
+# A few playlists on the first circle to show the feature off.
+[
+  "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
+  "https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd",
+  "https://open.spotify.com/playlist/37i9dQZF1DWTJ0ewkTmTo2"
+].each { |url| CirclePlaylist.create!(url: url, circle: circles.first) }
+
+# ---------------------------------------------------------------------------
+# Events
+# ---------------------------------------------------------------------------
+
+puts "> Creating events..."
+
+event_data = [
+  { title: "Surf Trip", private: true, location: "Ericeira, Portugal",
+    photo: "https://images.unsplash.com/photo-1526342122811-2a9c8512023d?auto=format&fit=crop&w=1200&q=80" },
+  { title: "Nico's Sweet 20th", private: true, location: "Hamburg, Germany",
+    photo: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80" },
+  { title: "Poker Night", private: true, location: "Las Vegas, USA",
+    photo: "https://images.unsplash.com/photo-1609769322709-2de28ae6503a?auto=format&fit=crop&w=1200&q=80" },
+  { title: "Pangea Festival", private: false, location: "Pütnitz, Germany",
+    photo: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1200&q=80" },
+  { title: "5-a-Side Football", private: true, location: "London, UK",
+    photo: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?auto=format&fit=crop&w=1200&q=80" },
+  { title: "Christmas Dinner", private: true, location: "Cape Town, South Africa",
+    photo: "https://images.unsplash.com/photo-1543094754-0790f4838e00?auto=format&fit=crop&w=1200&q=80" },
+  { title: "Saturday Market", private: false, location: "V&A Waterfront, Cape Town",
+    photo: "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&w=1200&q=80" },
+  { title: "Braai & Watch the Game", private: true, location: "Constantia, Cape Town",
+    photo: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80" }
+]
+
+events = event_data.each_with_index.map do |data, i|
+  circle = circles[i % circles.size]
+  start_date = Faker::Date.forward(days: rand(3..40))
+  event = Event.new(
+    title: data[:title], private: data[:private], location: data[:location],
+    user: circle.users.sample, start_date: start_date, end_date: start_date + rand(1..3)
   )
-  user.save
-  female_user_avatar_url = "https://xsgames.co/randomusers/avatar.php?g=female"
-  female_user_avatar_file = URI.open(female_user_avatar_url)
-  user.photo.attach(io: female_user_avatar_file, filename: 'user_avatar.png', content_type: 'image/png')
+  attach_image(event, :photos, data[:photo])
+  event.save!
+
+  # Attach the event to a circle and enrol that circle's members as attendees.
+  CircleEvent.create!(circle: circle, event: event)
+  circle.users.each { |user| UserEvent.find_or_create_by!(user: user, event: event) }
+  print "."
+  event
+end
+puts "\n  created #{Event.count} events"
+
+EventPlaylist.create!(url: "https://open.spotify.com/playlist/37i9dQZF1DX0BcQWzuB7ZO", event: events.first)
+
+# ---------------------------------------------------------------------------
+# Chat history — so the chatrooms aren't empty on the live demo
+# ---------------------------------------------------------------------------
+
+puts "> Seeding chat history..."
+
+CIRCLE_CHATTER = [
+  "Hey everyone! 👋", "Who's around this weekend?", "Just dropped a new playlist 🎧",
+  "Can't wait for the next meetup", "Anyone up for a call later?", "Great seeing you all!",
+  "Let's plan something soon 🙌", "Missed you all this week", "Count me in!", "So keen for this 🔥"
+]
+
+EVENT_CHATTER = [
+  "What time are we meeting?", "I'll bring snacks 🍿", "Can someone give me a lift?",
+  "So excited for this!", "Should we make a group playlist?", "Who's in charge of drinks?",
+  "See you all there 🙌", "Running 10 mins late, sorry!", "This is going to be epic",
+  "Don't forget your tickets 🎟️"
+]
+
+circles.each do |circle|
+  members = circle.users.to_a
+  rand(4..8).times do
+    CircleMessage.create!(circle: circle, user: members.sample, content: CIRCLE_CHATTER.sample)
+  end
 end
 
-puts "> Creating some circles"
+events.each do |event|
+  members = event.users.to_a
+  next if members.empty?
 
-# Family circle
-family_circle = Circle.create(
-  name: 'Family 🧡',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
-# group image
-family_circle_url = "https://images.unsplash.com/photo-1655185497013-db98aca061d3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-family_circle_file = URI.open(family_circle_url)
-family_circle.photo.attach(io: family_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-family_banner_url = "https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668164718/development/hoi-an-photographer-DyhiB_wFifk-unsplash_1_iihjlz.jpg"
-family_banner_file = URI.open(family_banner_url)
-family_circle.banner.attach(io: family_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: family_circle
-)
-4.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: family_circle
-  )
+  rand(3..7).times do
+    EventMessage.create!(event: event, user: members.sample, content: EVENT_CHATTER.sample)
+  end
 end
 
-CirclePlaylist.create(
-  url: "https://open.spotify.com/playlist/6FXSKFnt0PBo4W4itkLiSs?si=d1a25c33e4eb4f1b",
-  circle: family_circle
-)
+# ---------------------------------------------------------------------------
+# Payments — populate balances so the bill-splitting feature shows real numbers
+# ---------------------------------------------------------------------------
 
-CirclePlaylist.create(
-  url: "https://open.spotify.com/playlist/5pETvbqkSwgr6QDJdfkbvz?si=6d4d3139a77647e0",
-  circle: family_circle
-)
+puts "> Seeding payments..."
 
-CirclePlaylist.create(
-  url: "https://open.spotify.com/playlist/37i9dQZF1DWTJ0ewkTmTo2?si=397cccbd6adc4bc2",
-  circle: family_circle
-)
+events.first(4).each do |event|
+  user_events = event.user_events.to_a
+  next if user_events.size < 2
 
-# Basketball circle
-basketball_circle = Circle.create(
-  name: 'Miami Bulls 🏀',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
+  2.times do
+    payer = user_events.sample
+    splittees = (user_events - [payer]).sample(rand(1..[user_events.size - 1, 4].min))
+    amount = rand(20..200)
+    payment = Payment.create!(user_event: payer, description: Faker::Commerce.product_name, amount: amount)
+    payment.user_events = splittees
 
-# group image
-basketball_circle_url = "https://images.unsplash.com/photo-1515523110800-9415d13b84a8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
-basketball_circle_file = URI.open(basketball_circle_url)
-basketball_circle.photo.attach(io: basketball_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-basketball_banner_url = "https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668169251/development/kenny-eliason-O4zhy0zLAQc-unsplash_zrv34h.jpg"
-basketball_banner_file = URI.open(basketball_banner_url)
-basketball_circle.banner.attach(io: basketball_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: basketball_circle
-)
-12.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: basketball_circle
-  )
+    split_amount = amount / (splittees.count + 1)
+    payer.update!(balance: payer.balance + amount - split_amount)
+    splittees.each { |se| se.update!(balance: se.balance - split_amount) }
+  end
 end
 
-# Work circle
-work_circle = Circle.create(
-  name: 'The Office 💻',
-  private: false,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
+# ---------------------------------------------------------------------------
 
-# group image
-work_circle_url = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1742&q=80"
-work_circle_file = URI.open(work_circle_url)
-work_circle.photo.attach(io: work_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-work_banner_url = "https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668169345/development/javier-allegue-barros-i5Kx0P8A0d4-unsplash_vegqst.jpg"
-work_banner_file = URI.open(work_banner_url)
-work_circle.banner.attach(io: work_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: work_circle
-)
-10.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: work_circle
-  )
-end
-
-# Friends Circle
-friends_circle = Circle.create(
-  name: 'The Day Ones 💯',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
-# group image
-friends_circle_url = "https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668250710/development/simi-iluyomade-tvbxqXI5mmo-unsplash_wsd9mc.jpg"
-friends_circle_file = URI.open(friends_circle_url)
-friends_circle.photo.attach(io: friends_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-friends_banner_url = "https://images.unsplash.com/photo-1475483768296-6163e08872a1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-friends_banner_file = URI.open(friends_banner_url)
-friends_circle.banner.attach(io: friends_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: friends_circle
-)
-6.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: friends_circle
-  )
-end
-
-# Le Wagon Circle
-wagon_circle = Circle.create(
-  name: 'Le Wagon Crew 🤓',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
-# group image
-wagon_circle_url = "https://lh3.googleusercontent.com/p/AF1QipO9t_lD_AyFwuYqnTl-SDoqOF-JiFsAZk50uBYv=s1360-w1360-h1020"
-wagon_circle_file = URI.open(wagon_circle_url)
-wagon_circle.photo.attach(io: wagon_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-wagon_banner_url = "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1184&q=80"
-wagon_banner_file = URI.open(wagon_banner_url)
-wagon_circle.banner.attach(io: wagon_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: wagon_circle
-)
-14.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: wagon_circle
-  )
-end
-
-# Chess Club Circle
-chess_circle = Circle.create(
-  name: 'Chess Club ♟️',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
-# group image
-chess_circle_url = "https://images.unsplash.com/photo-1529699310859-b163e33e4556?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=605&q=80"
-chess_circle_file = URI.open(chess_circle_url)
-chess_circle.photo.attach(io: chess_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-chess_banner_url = "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-chess_banner_file = URI.open(chess_banner_url)
-chess_circle.banner.attach(io: chess_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: chess_circle
-)
-7.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: chess_circle
-  )
-end
-
-# Chess Club Circle
-footy_circle = Circle.create(
-  name: 'Footy Lads 🍻',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
-# group image
-footy_circle_url = "https://aflnz.co.nz/wp-content/uploads/2017/08/One-team-many-cultures-feature.jpg"
-footy_circle_file = URI.open(footy_circle_url)
-footy_circle.photo.attach(io: footy_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-footy_banner_url = "https://live-production.wcms.abc-cdn.net.au/bd3ab61625858835228fb658c133c1cc?src"
-footy_banner_file = URI.open(footy_banner_url)
-footy_circle.banner.attach(io: footy_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: footy_circle
-)
-18.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: footy_circle
-  )
-end
-
-# Chess Club Circle
-ravers_circle = Circle.create(
-  name: 'World Class Ravers',
-  private: true,
-  border_color: %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff].sample
-)
-# group image
-ravers_circle_url = "https://images.unsplash.com/photo-1637561930888-dfedf87bf609?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1167&q=80"
-ravers_circle_file = URI.open(ravers_circle_url)
-ravers_circle.photo.attach(io: ravers_circle_file, filename: 'circle_img.png', content_type: 'image/png')
-
-# banner image
-ravers_banner_url = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-ravers_banner_file = URI.open(ravers_banner_url)
-ravers_circle.banner.attach(io: ravers_banner_file, filename: 'circle_img.png', content_type: 'image/png')
-
-UserCircle.create(
-  user: main_user,
-  circle: ravers_circle
-)
-9.times do
-  UserCircle.create(
-    user: User.all.sample,
-    circle: ravers_circle
-  )
-end
-
-puts "> Creating some events..."
-
-surf_trip = Event.create(
-  title: "Surf Trip",
-  private: true,
-  location: "Gnaraloo",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-surf_trip_url = "https://images.unsplash.com/photo-1526342122811-2a9c8512023d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-surf_trip_file = URI.open(surf_trip_url)
-surf_trip.photos.attach(io: surf_trip_file, filename: 'event_img.png', content_type: 'image/png')
-
-EventPlaylist.create(
-  url: "https://open.spotify.com/playlist/1dg4MQuRRxbWkQMb1SnbQX?si=d1bd88b31ce846c4",
-  event: surf_trip
-)
-
-EventPlaylist.create(
-  url: "https://open.spotify.com/playlist/3vnd357nDv9MOLaW3UFEdN?si=678fd516cc0c4ed7",
-  event: surf_trip
-)
-
-EventPlaylist.create(
-  url: "https://open.spotify.com/playlist/2lOLiLsEelhkdzXTIROsX2?si=f7bfd1c1c1194ea0",
-  event: surf_trip
-)
-
-EventPlaylist.create(
-  url: "https://open.spotify.com/playlist/6FXSKFnt0PBo4W4itkLiSs?si=cd3c4e350990405a",
-  event: surf_trip
-)
-
-nico_party = Event.create(
-  title: "Nico's Sweet 20th",
-  private: true,
-  location: "Hamburg",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-nico_party_url = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
-nico_party_file = URI.open(nico_party_url)
-nico_party.photos.attach(io: nico_party_file, filename: 'event_img.png', content_type: 'image/png')
-
-poker_night = Event.create(
-  title: "Poker Night",
-  private: true,
-  location: "Las Vegas",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-poker_night_url = "https://images.unsplash.com/photo-1609769322709-2de28ae6503a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=725&q=80"
-poker_night_file = URI.open(poker_night_url)
-poker_night.photos.attach(io: poker_night_file, filename: 'event_img.png', content_type: 'image/png')
-
-pangea = Event.create(
-  title: "Pangea Festival",
-  private: false,
-  location: "Cederburg Wilderness Area",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-pangea_url = "https://www.tribeofpangea.com/wp-content/uploads/2020/07/webonly_PANGEA_0104_800.jpg"
-pangea_file = URI.open(pangea_url)
-pangea.photos.attach(io: pangea_file, filename: 'event_img.png', content_type: 'image/png')
-
-footy = Event.create(
-  title: "5-a-Side Football",
-  private: true,
-  location: "Rhodes High School",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-footy_url = "https://images.unsplash.com/photo-1544698310-74ea9d1c8258?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1332&q=80"
-footy_file = URI.open(footy_url)
-footy.photos.attach(io: footy_file, filename: 'event_img.png', content_type: 'image/png')
-
-christmas = Event.create(
-  title: "Christmas",
-  private: true,
-  location: "South Pole",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-christmas_url = "https://images.unsplash.com/photo-1543094754-0790f4838e00?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-christmas_file = URI.open(christmas_url)
-christmas.photos.attach(io: christmas_file, filename: 'event_img.png', content_type: 'image/png')
-
-ozcf = Event.create(
-  title: "OZCF Market",
-  private: false,
-  location: "V&A Waterfront",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-ozcf_url = "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-ozcf_file = URI.open(ozcf_url)
-ozcf.photos.attach(io: ozcf_file, filename: 'event_img.png', content_type: 'image/png')
-
-braai = Event.create(
-  title: "Braai & Watch Bokke",
-  private: true,
-  location: "Constantia",
-  user: User.all.sample,
-  start_date: Faker::Date.between(from: '2022-11-1', to: '2022-11-30'),
-  end_date: Faker::Date.between(from: '2022-11-30', to: '2023-01-30')
-)
-
-braai_url = "https://www.sapeople.com/wp-content/uploads/2022/11/france-win-221112-kurt-lee-arendse-springboks.jpeg"
-braai_file = URI.open(braai_url)
-braai.photos.attach(io: braai_file, filename: 'event_img.png', content_type: 'image/png')
-
-puts '> Finished!'
-puts "> Made #{User.count} users, #{Circle.count} circles and #{Event.count} events!"
+puts "> Finished!"
+puts "> #{User.count} users, #{Circle.count} circles, #{Event.count} events, " \
+     "#{CircleMessage.count + EventMessage.count} messages, #{Payment.count} payments."
+puts "> Log in with  benten@gmail.com / password"

@@ -34,11 +34,11 @@
             <% @event.photos.each_with_index do |photo, index| %>
               <% if index == 0 %>
                 <div class="carousel-item active">
-                  <%= cl_image_tag photo.key, class: "d-block w-100 event-photo"%>
+                  <%= image_tag photo, class: "d-block w-100 event-photo" %>
                 </div>
                   <% else %>
                 <div class="carousel-item">
-                  <%= cl_image_tag photo.key, class: "d-block w-100 event-photo"%>
+                  <%= image_tag photo, class: "d-block w-100 event-photo" %>
                 </div>
                   <% end %>
               <% end %>
@@ -159,7 +159,7 @@
       <div class="event-right-side-host-card">
         <%= link_to dashboard_path(@event.user_id) do %>
           <div class="event-right-side-host-body">
-            <%= cl_image_tag User.find(@event.user_id).photo.key %>
+            <%= image_tag User.find(@event.user_id).photo %>
             <div class="event-right-side-host-info">
               <h4><%= User.find(@event.user_id).first_name %> <%= User.find(@event.user_id).last_name %></h4>
               <p>Joined <%= User.all.first.created_at.strftime("%b %Y") %></p>
@@ -173,10 +173,10 @@
       <div class="circle-grid">
         <% @circles.each do |circle|%>
           <%= link_to circle_path(circle) do %>
-            <% if circle.photo.key? %>
-              <%= cl_image_tag circle.photo.key, class: "circle-avatar", :style => "border-color: #{circle.border_color}", alt: "Circle Avatar" %>
+            <% if circle.photo.attached? %>
+              <%= image_tag circle.photo, class: "circle-avatar", style: "border-color: #{circle.border_color}", alt: "Circle Avatar" %>
             <% else %>
-              <%= cl_image_tag "hk6soz418q50zk89hkppwut8mp97", class: "circle-avatar", alt: "circle-avatar" %>
+              <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: "circle-avatar" %>
             <% end %>
           <% end %>
         <% end %>
@@ -215,7 +215,7 @@
         <div class="anker-member-info">
           <ul>
             <% @event.users.each do |user| %>
-              <li><%= cl_image_tag user.photo.key %>
+              <li><%= image_tag user.photo %>
                   <p><%= user.first_name %> <%= user.last_name %></p>
               </li>
             <% end %>

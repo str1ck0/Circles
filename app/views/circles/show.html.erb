@@ -1,16 +1,16 @@
-<% if @circle.banner.key? %>
+<% if @circle.banner.attached? %>
   <div class="circle-show-banner">
-    <%= cl_image_tag @circle.banner.key %>
+    <%= image_tag @circle.banner %>
     <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
   </div>
 <% else %>
   <div class="circle-show-banner">
-    <%= cl_image_tag "0x0_bfxmqe" %>
+    <%= image_tag "2560x1440_stars_glare_space_darkness_black.jpeg" %>
     <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
   </div>
 <% end %>
 <div class="circle-show-title">
-  <%= cl_image_tag @circle.photo.key, class: "circle-avatar-circle", :style => "border-color: #{@circle.border_color}", alt: "circle-avatar" %>
+  <%= image_tag @circle.photo, class: "circle-avatar-circle", style: "border-color: #{@circle.border_color}", alt: "circle-avatar" %>
   <div class="circle-show-details">
     <h1><%= @circle.name.upcase %></h1>
     <p class="mb-2"><%= @circle.created_at.strftime("STARTED %b %Y") %></p>
@@ -78,7 +78,7 @@
         </div>
           <ul style="list-style: none">
             <% @circle.users.each do |user| %>
-            <li style="font-size: 12px"><%= cl_image_tag user.photo.key %> <%= user.first_name.upcase %> <%= user.last_name.upcase %></li>
+            <li style="font-size: 12px"><%= image_tag user.photo %> <%= user.first_name.upcase %> <%= user.last_name.upcase %></li>
             <% end %>
           </ul>
         </div>
@@ -98,7 +98,7 @@
                       <div class="title-container">
                         <p><%= event.title.upcase %></p>
                       </div>
-                      <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%=cl_image_path event.photos.first.key %>);">
+                      <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%= url_for(event.photos.first) %>);">
                         <div class="icons">
                           <div class="attending">
                             <i class="fa-solid fa-user-group"></i>
@@ -115,7 +115,7 @@
                     </div>
                   <% else %>
                     <div class="circle-show-event-card">
-                      <div class="image-icon-container" style="background-image: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url(<%=cl_image_path "hk6soz418q50zk89hkppwut8mp97" %>)">
+                      <div class="image-icon-container" style="background-image: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url(<%= asset_path('avatar/CirclesAvatar.png') %>)">
                         <div class="icons">
                             <i class="fa-solid fa-user-group"></i>
                           <% if event.private  %>
@@ -148,7 +148,7 @@
             <div class="splide__track">
               <ul class="splide__list">
                 <% @circle.events.each do |event| %>
-                  <li class="splide__slide"><%= cl_image_tag event.photos[0].key %></li>
+                  <li class="splide__slide"><%= image_tag event.photos[0] %></li>
                 <% end %>
               </ul>
             </div>

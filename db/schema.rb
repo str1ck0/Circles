@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_17_153618) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_07_123740) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -76,6 +76,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_17_153618) do
     t.datetime "updated_at", null: false
     t.text "description"
     t.string "border_color", default: "#FFFFFF"
+    t.bigint "owner_id"
+    t.index ["owner_id"], name: "index_circles_on_owner_id"
   end
 
   create_table "event_messages", force: :cascade do |t|
@@ -169,6 +171,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_17_153618) do
   add_foreign_key "circle_messages", "circles"
   add_foreign_key "circle_messages", "users"
   add_foreign_key "circle_playlists", "circles"
+  add_foreign_key "circles", "users", column: "owner_id"
   add_foreign_key "event_messages", "events"
   add_foreign_key "event_messages", "users"
   add_foreign_key "event_playlists", "events"

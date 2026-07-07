@@ -6,5 +6,8 @@ test:
 
 production:
   adapter: redis
-  url: <%= ENV.fetch("REDISCLOUD_URL") { "redis://localhost:6379/1" } %>
+  # Upstash/Render/Heroku all expose the connection string as REDIS_URL.
+  url: <%= ENV["REDIS_URL"] || ENV["REDISCLOUD_URL"] || "redis://localhost:6379/1" %>
   channel_prefix: Circles_production
+  ssl_params:
+    verify_mode: <%= OpenSSL::SSL::VERIFY_NONE %>

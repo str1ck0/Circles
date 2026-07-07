@@ -81,6 +81,5 @@ test:
 #
 production:
   <<: *default
-  database: Circles_production
-  username: Circles
-  password: <%= ENV["CIRCLES_DATABASE_PASSWORD"] %>
+  # Managed Postgres (e.g. Neon) provides a single DATABASE_URL connection string.
+  url: <%= ENV["DATABASE_URL"] %>

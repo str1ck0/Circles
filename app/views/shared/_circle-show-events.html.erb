@@ -8,7 +8,7 @@
             <div class="title-container">
               <p><%= event.title.upcase %></p>
             </div>
-            <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%=cl_image_path event.photos.first.key %>);">
+            <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%= url_for(event.photos.first) %>);">
               <div class="icons">
                 <div class="attending">
                   <i class="fa-solid fa-user-group"></i>
@@ -25,7 +25,7 @@
           </div>
               <% else %>
               <div class="event-card">
-                <div class="image-icon-container" style="background-image: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url(<%=cl_image_path "hk6soz418q50zk89hkppwut8mp97" %>)">
+                <div class="image-icon-container" style="background-image: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url(<%= asset_path('avatar/CirclesAvatar.png') %>)">
                   <div class="icons">
                     <i class="fa-solid fa-user-group"></i>
                   <% if event.private  %>
