@@ -55,7 +55,9 @@
           <% end %>
         <% end %>
       </div>
-      <div style="margin-top: 15px;"><%= link_to "Logout", destroy_user_session_path, data: {turbo_method: :delete}, class: "hover-underline-animation" %></div>
+      <% if user_signed_in? %>
+        <div style="margin-top: 15px;"><%= link_to "Logout", destroy_user_session_path, data: {turbo_method: :delete}, class: "hover-underline-animation" %></div>
+      <% end %>
     </div>
   </div>
   <div class="feed-container" data-controller="gradient">
