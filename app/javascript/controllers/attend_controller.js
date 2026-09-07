@@ -24,6 +24,19 @@ export default class extends Controller {
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      Swal.fire({
+        position: 'bottom-end',
+        icon: 'error',
+        title: 'NOT ALLOWED',
+        text: data.error || (data.errors && data.errors.join(', ')) || 'Could not join this event',
+        showConfirmButton: false,
+        timer: 2500,
+      });
+      return;
+    }
+
     const userCount = data.user_count;
     this.userCountTarget.innerText = userCount
 

@@ -53,9 +53,21 @@ model, Action Cable channel, Stimulus subscription controller, and playlists mod
 change on the other — grep for the `circle_` name and its `event_` twin before assuming a
 fix is complete.
 
+**Authorization is Pundit, and there are only two policies that matter.** `CirclePolicy`
+and `EventPolicy` (`app/policies/`) carry every rule; the join-table controllers
+(messages, playlists, user_circles, user_events, circle_events, payments) authorize
+against the parent — `authorize @circle, :chat?` — rather than having policies of their
+own. `ApplicationController` runs `verify_authorized` after every non-Devise action, so a
+new action that forgets to `authorize` fails loudly. Chat channels identify
+`current_user` from Warden in `ApplicationCable::Connection` and `reject` unless the
+policy's `chat?` allows. Semantics: `private: false` circles are public clubs (visible to
+all, one-click join); private ones are members-only. An event is visible to attendees and,
+unless private, to members of its attached circles.
+
 **Bill splitting lives on the join table, not the user.** `balance` is a column on
 `user_events`, so it is per-event, not a global wallet. The split arithmetic is in
-`PaymentsController#create`, not in `Payment` — the model is associations only.
+`PaymentsController#create`, wrapped in a transaction; the payer absorbs the integer
+remainder so balance changes always sum to zero.
 
 **Real-time chat** uses the in-process `async` adapter in development, so it works with no
 Redis running. Production needs `REDIS_URL` *and* `APP_HOST` — the latter feeds
@@ -64,22 +76,28 @@ chat silently fails to connect without it.
 
 ## Tests
 
-The suite is thin and mostly unwritten. Only `test/models/user_test.rb`,
-`circle_playlist_test.rb` and `event_playlist_test.rb` contain real assertions; every other
-file under `test/` is an empty generated scaffold. `bin/rails test` currently reports
-**1 error** — `test/controllers/user_circles_controller_test.rb` is a stale scaffold calling
-a `user_circles_create_url` helper that doesn't exist. That failure is pre-existing and
-unrelated to any change you make.
+`bin/rails test` should be green. Coverage is concentrated where the risk is: policy
+tests, controller tests for every guarded path, channel tests, and the payment split.
+Build records with the helpers in `test/test_helper.rb` (`create_user`, `create_circle`,
+`create_event`) — circles need a photo *and* banner attached to be valid, and the helpers
+handle that with `test/fixtures/files/avatar.png`. Geocoder is stubbed globally.
+
+Three deliberate settings in `config/environments/test.rb`, each there because of a real
+failure:
+
+- `config.active_job.queue_adapter = :test` — with the default `:async` adapter, Active
+  Storage's analyze jobs run on background threads sharing the transactional test
+  connection: attachments intermittently vanished mid-test and the suite sometimes hung
+  at exit.
+- `config.assets.css_compressor = nil` — mirrors production; without it
+  sassc-rails adds a compressor pass that can't parse tom-select's `max(var(--x), …)`.
+- **Never build a production-mode Sprockets environment locally** (e.g.
+  `Sprockets::Railtie.build_environment` in a runner). It poisons the shared
+  `tmp/cache/assets`, after which view tests fail with `AssetNotPrecompiledError` for
+  `application.css`. Fix: `rm -rf tmp/cache/assets`.
 
 Routes are deliberately trimmed to implemented actions only, so scaffold-style tests and
 `link_to` helpers for unimplemented CRUD will not resolve.
-
-## Known rough edges
-
-- `UserEventsController#create` — the `else` branch calls `format.html` outside any
-  `respond_to` block, raising `NameError` whenever the save fails.
-- `PaymentsController#create` — `payment.amount` is an integer column and the split uses
-  integer division, so remainders vanish and balances drift by a few units.
 
 ## Deployment
 

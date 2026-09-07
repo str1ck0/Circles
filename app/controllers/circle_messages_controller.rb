@@ -1,6 +1,7 @@
 class CircleMessagesController < ApplicationController
   def create
     @circle = Circle.find(params[:circle_id])
+    authorize @circle, :chat?
     @circle_message = CircleMessage.new(circle_message_params)
     @circle_message.circle = @circle
     @circle_message.user = current_user
@@ -12,7 +13,7 @@ class CircleMessagesController < ApplicationController
       )
       head :ok
     else
-      render "chatrooms/show", status: :unprocessable_entity
+      head :unprocessable_entity
     end
   end
 

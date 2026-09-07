@@ -1,10 +1,8 @@
 class CircleChatroomChannel < ApplicationCable::Channel
   def subscribed
-    circle_chatroom = Circle.find(params[:id])
-    stream_for circle_chatroom
-  end
+    circle = Circle.find_by(id: params[:id])
+    return reject unless circle && CirclePolicy.new(current_user, circle).chat?
 
-  def unsubscribed
-    # Any cleanup needed when channel is unsubscribed
+    stream_for circle
   end
 end

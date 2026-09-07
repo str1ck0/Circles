@@ -6,7 +6,7 @@
         data-friend-user-id-value="<%= user.id %>"
         data-friend-circle-id-value="<%= circle.id %>">
         <div class="circle-img-add-friend">
-          <%= image_tag user.photo %>
+          <%= user_avatar user %>
         </div>
         <div class="circle-add-friend-info">
           <p><%= user.full_name %></p>

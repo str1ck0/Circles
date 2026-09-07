@@ -1,3 +1,4 @@
+<% event_policy = policy(@event) %>
 <div class="event-header" data-controller="attend" data-attend-url-value="<%= event_user_events_url(@event) %>">
   <div class="event-header-left">
     <h1><%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %></h1>
@@ -9,7 +10,7 @@
     <div class="event-header-middle-info">
       <p>
         <i class="fa-solid fa-user-group"></i>
-        <span data-attend-target="userCount"><%= @event.users.count %></span>
+        <span data-attend-target="userCount"><%= @event.users.size %></span>
         <% if @event.private? %>
           <i class="fa-solid fa-lock"></i> Private
         <% else %>
@@ -21,7 +22,11 @@
   </div>
   <div class="event-header-right">
     <div class="event-header-right-attending">
-      <%= link_to "Attend Event", event_user_events_path(@event), data: { turbo_method: :post, action: "click->attend#clicky" }, class:"btn btn-success loool" %>
+      <% if event_policy.rsvp? %>
+        <%= link_to "Attend Event", event_user_events_path(@event), data: { turbo_method: :post, action: "click->attend#clicky" }, class:"btn btn-success loool" %>
+      <% elsif event_policy.attendee? %>
+        <span class="btn btn-success loool"><i class="fa-solid fa-check"></i> You're going</span>
+      <% end %>
     </div>
   </div>
 </div>
@@ -29,28 +34,24 @@
   <div class="event-left-side-container">
     <div class="event-left-side-banner">
       <div class="event-show-carousel-container">
-        <div class="event-show-carousel-slide" data-bs-ride="carousel">
+        <div id="eventPhotos" class="carousel slide event-show-carousel-slide" data-bs-ride="carousel">
           <div class="carousel-inner">
             <% @event.photos.each_with_index do |photo, index| %>
-              <% if index == 0 %>
-                <div class="carousel-item active">
-                  <%= image_tag photo, class: "d-block w-100 event-photo" %>
-                </div>
-                  <% else %>
-                <div class="carousel-item">
-                  <%= image_tag photo, class: "d-block w-100 event-photo" %>
-                </div>
-                  <% end %>
-              <% end %>
-              <button class="carousel-control-prev" type="button" data-bs-target="#carouselPhotosControls" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-              </button>
-              <button class="carousel-control-next" type="button" data-bs-target="#carouselPhotosControls" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-              </button>
+              <div class="carousel-item <%= 'active' if index.zero? %>">
+                <%= image_tag photo, class: "d-block w-100 event-photo" %>
+              </div>
+            <% end %>
           </div>
+          <% if @event.photos.size > 1 %>
+            <button class="carousel-control-prev" type="button" data-bs-target="#eventPhotos" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#eventPhotos" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          <% end %>
         </div>
       </div>
     </div>
@@ -59,30 +60,38 @@
         <div class="event-show-chatroom-header">
           <h5><%= @event.title.upcase %> CHAT</h5>
         </div>
+        <% if event_policy.chat? %>
           <div class="event-show-chatroom" data-controller="event-chatroom-subscription" data-event-chatroom-subscription-chatroom-id-value="<%= @event.id %>" data-event-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
 
-          <div class="messages" data-event-chatroom-subscription-target="messages">
-            <% @event.event_messages.each do |event_message| %>
-              <div class="message-row d-flex <%= event_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
-                <div class="<%= event_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
-                  <%= render "event_messages/event_message", event_message: event_message %>
+            <div class="messages" data-event-chatroom-subscription-target="messages">
+              <% @event.event_messages.each do |event_message| %>
+                <div class="message-row d-flex <%= event_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
+                  <div class="<%= event_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
+                    <%= render "event_messages/event_message", event_message: event_message %>
+                  </div>
                 </div>
-              </div>
+              <% end %>
+            </div>
+            <%= simple_form_for [@event, @event_message], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "d-flex" } do |f| %>
+            <%= f.input :content, label: false, placeholder: "Message #{@event.title}", wrapper_html: {class: "flex-grow-1"} %>
+            <%= f.submit "Send", class: "global-button-chat" %>
             <% end %>
           </div>
-          <%= simple_form_for [@event, @event_message], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "d-flex" } do |f| %>
-          <%= f.input :content, label: false, placeholder: "Message #{@event.title}", wrapper_html: {class: "flex-grow-1"} %>
-          <%= f.submit "Send", class: "global-button-chat" %>
-          <% end %>
-        </div>
+        <% else %>
+          <div class="event-show-chatroom">
+            <p class="p-3">Attend the event to join the chat.</p>
+          </div>
+        <% end %>
       </div>
       <div class="event-right-side-music">
       <div class="spotify-playlists-header">
         <h5>EVENT PLAYLISTS</h5>
-        <!-- Playlist Button trigger modal -->
-        <button type="button" class="global-button" id="playlist-button", data-bs-toggle="modal" data-bs-target="#addPlaylist">
-          <h5>+</h5>
-        </button>
+        <% if event_policy.add_playlist? %>
+          <!-- Playlist Button trigger modal -->
+          <button type="button" class="global-button" id="playlist-button" data-bs-toggle="modal" data-bs-target="#addPlaylist">
+            <h5>+</h5>
+          </button>
+        <% end %>
       </div>
       <div class="event-playlists-grid">
         <% @event.event_playlists.each do |playlist| %>
@@ -90,13 +99,14 @@
         <% end %>
       </div>
 
+        <% if event_policy.add_playlist? %>
         <!-- Modal -->
         <div class="modal fade" id="addPlaylist" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddPlaylistLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content modal-content-circle-show">
               <div class="modal-header">
                 <i class="fa-brands fa-spotify"></i>
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Add a Playlist</h1>
+                <h1 class="modal-title fs-5" id="AddPlaylistLabel">Add a Playlist</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body modal-body-content">
@@ -111,15 +121,17 @@
             </div>
           </div>
         </div>
+        <% end %>
       </div>
     </div>
     <div class="event-left-side-anker">
+      <% if event_policy.add_payment? %>
       <div class="anker-splitty">
         <div class="splitty">
           <h5>SPLITTY - EVENT COSTS</h5>
           <div class="splitty-body">
             <div class="splitty-people">
-              <% @event.user_events.sort_by {|user| user.balance * user.balance }.reverse.each do |user_event| %>
+              <% @event.user_events.includes(:user).sort_by { |ue| -ue.balance.abs }.each do |user_event| %>
                 <p><%= user_event.user.first_name %>: R <%= user_event.balance %></p>
               <% end %>
             </div>
@@ -136,6 +148,7 @@
           </div>
         </div>
       </div>
+      <% end %>
       <div class="event-right-side-location">
         <h5><i class="fa-solid fa-location-dot"></i> LOCATION : <%= @event.location %></h5>
         <div class="event-right-side-location-body">
@@ -157,39 +170,37 @@
     <div class="event-right-side-host">
       <h5>HOSTED BY</h5>
       <div class="event-right-side-host-card">
-        <%= link_to dashboard_path(@event.user_id) do %>
+        <%= link_to dashboard_path(@event.user) do %>
           <div class="event-right-side-host-body">
-            <%= image_tag User.find(@event.user_id).photo %>
+            <%= image_tag @event.user.photo if @event.user.photo.attached? %>
             <div class="event-right-side-host-info">
-              <h4><%= User.find(@event.user_id).first_name %> <%= User.find(@event.user_id).last_name %></h4>
-              <p>Joined <%= User.all.first.created_at.strftime("%b %Y") %></p>
+              <h4><%= @event.user.full_name %></h4>
+              <p>Joined <%= @event.user.created_at.strftime("%b %Y") %></p>
             </div>
           </div>
         <% end %>
       </div>
     </div>
+    <% if event_policy.attach_circle? %>
     <div class="event-right-side-invite">
       <h5>INVITE A CIRCLE</h5>
       <div class="circle-grid">
-        <% @circles.each do |circle|%>
-          <%= link_to circle_path(circle) do %>
-            <% if circle.photo.attached? %>
-              <%= image_tag circle.photo, class: "circle-avatar", style: "border-color: #{circle.border_color}", alt: "Circle Avatar" %>
-            <% else %>
-              <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: "circle-avatar" %>
-            <% end %>
-          <% end %>
+        <% @circles.each do |circle| %>
+          <%= render "shared/circle_avatar", circle: circle %>
         <% end %>
       </div>
-      <%= simple_form_for [@event, @circle_event] do |f| %>
-        <div class="event-right-side-invite-body">
-          <div class="event-right-side-invite-body-circles">
-            <%= f.association :circle, as: :radio_buttons, required: false, label: "", collection: current_user.circles %>
+      <% if @attachable_circles.any? %>
+        <%= simple_form_for [@event, @circle_event] do |f| %>
+          <div class="event-right-side-invite-body">
+            <div class="event-right-side-invite-body-circles">
+              <%= f.association :circle, as: :radio_buttons, required: false, label: "", collection: @attachable_circles %>
+            </div>
           </div>
-        </div>
-        <%= f.button :submit, "Add Circle", class:"event-add-circle-button" %>
+          <%= f.button :submit, "Add Circle", class:"event-add-circle-button" %>
+        <% end %>
       <% end %>
     </div>
+    <% end %>
       <div class="event-right-side-details">
         <div class="event-right-side-details-header">
           <h5>DETAILS</h5>
@@ -204,7 +215,7 @@
               <p><i class="fa-solid fa-lock"></i></p>
               <p>Private Event</p>
             <% else %>
-              <p><i class="fa-solid fa-unlock"></i></i></p>
+              <p><i class="fa-solid fa-unlock"></i></p>
               <p>Public Event</p>
             <% end %>
           </div>
@@ -215,8 +226,8 @@
         <div class="anker-member-info">
           <ul>
             <% @event.users.each do |user| %>
-              <li><%= image_tag user.photo %>
-                  <p><%= user.first_name %> <%= user.last_name %></p>
+              <li><%= image_tag user.photo if user.photo.attached? %>
+                  <p><%= user.full_name %></p>
               </li>
             <% end %>
           </ul>
