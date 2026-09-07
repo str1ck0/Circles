@@ -1,8 +1,5 @@
 class EventMessage < ApplicationRecord
-  belongs_to :user
-  belongs_to :event
+  include ChatMessage
 
-  def sender?(a_user)
-    user.id == a_user.id
-  end
+  belongs_to :event
 end

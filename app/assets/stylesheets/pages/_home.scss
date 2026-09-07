@@ -138,14 +138,3 @@
 @media (prefers-reduced-motion: reduce) {
   .orbit-ring, .orbit-satellite { animation: none; }
 }
-
-.circle-grid {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.circle-show-upcoming-events-cards {
-  display: flex;
-}

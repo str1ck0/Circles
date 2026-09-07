@@ -20,7 +20,7 @@ class CirclesControllerTest < ActionDispatch::IntegrationTest
     sign_in @member
     get circle_path(@private_circle)
     assert_response :success
-    assert_includes response.body, "circle-chatroom-subscription"
+    assert_includes response.body, "CircleChatroomChannel"
     assert_includes response.body, "Invite friends"
     assert_includes response.body, "Create invite link"
   end
@@ -30,7 +30,7 @@ class CirclesControllerTest < ActionDispatch::IntegrationTest
     get circle_path(@public_circle)
     assert_response :success
     assert_includes response.body, "Join circle"
-    assert_not_includes response.body, "circle-chatroom-subscription"
+    assert_not_includes response.body, "CircleChatroomChannel"
     assert_not_includes response.body, "Invite friends"
   end
 

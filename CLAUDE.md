@@ -55,12 +55,13 @@ primary action) and `.btn-ghost`; avatars are `.ring-avatar` with `style="--ring
 Pages not yet rebuilt (circle, event, dashboard) rely on the "compatibility" block at the
 bottom of `_shell.scss` — delete their entries as each page is revamped.
 
-**Circles and events are near-perfect mirrors of each other.** Each has its own messages
-model, Action Cable channel, Stimulus subscription controller, and playlists model
-(`circle_messages`/`event_messages`, `CircleChatroomChannel`/`EventChatroomChannel`,
-`circle_playlists`/`event_playlists`). A change to one side almost always needs the same
-change on the other — grep for the `circle_` name and its `event_` twin before assuming a
-fix is complete.
+**Circles and events mirror each other, and the shared behaviour is extracted.** Messages
+and playlists exist twice (`circle_messages`/`event_messages`, `circle_playlists`/
+`event_playlists`) but the logic lives once: `ChatMessage` and `SpotifyEmbed` model
+concerns, `ChatroomChannel` (channels declare `chatroom_class`), `ChatMessagesController`
+and `PlaylistsController` bases (subclasses only name the parent, association, channel and
+param key), the `shared/_chat_message` partial and a single `chatroom-subscription`
+Stimulus controller that takes the channel name as a value. Change the base, not the twins.
 
 **Authorization is Pundit, and there are only two policies that matter.** `CirclePolicy`
 and `EventPolicy` (`app/policies/`) carry every rule; the join-table controllers

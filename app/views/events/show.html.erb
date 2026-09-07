@@ -140,17 +140,17 @@
           <span class="text-faint"><%= @event.title %></span>
         </div>
         <% if event_policy.chat? %>
-          <div class="chat-panel-body" data-controller="event-chatroom-subscription" data-event-chatroom-subscription-chatroom-id-value="<%= @event.id %>" data-event-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
-            <div class="messages" data-event-chatroom-subscription-target="messages">
+          <div class="chat-panel-body" data-controller="chatroom-subscription" data-chatroom-subscription-channel-value="EventChatroomChannel" data-chatroom-subscription-id-value="<%= @event.id %>" data-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
+            <div class="messages" data-chatroom-subscription-target="messages">
               <% @event.event_messages.includes(:user).each do |event_message| %>
                 <div class="message-row d-flex <%= event_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
                   <div class="<%= event_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
-                    <%= render "event_messages/event_message", event_message: event_message %>
+                    <%= render "shared/chat_message", message: event_message %>
                   </div>
                 </div>
               <% end %>
             </div>
-            <%= simple_form_for [@event, EventMessage.new], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "chat-form" } do |f| %>
+            <%= simple_form_for [@event, EventMessage.new], html: { data: { action: "turbo:submit-end->chatroom-subscription#resetForm" }, class: "chat-form" } do |f| %>
               <%= f.input :content, label: false, placeholder: "Message #{@event.title}", wrapper_html: { class: "flex-grow-1 mb-0" }, input_html: { rows: 1, autocomplete: "off" } %>
               <%= f.button :submit, "Send", class: "btn-accent btn-sm" %>
             <% end %>

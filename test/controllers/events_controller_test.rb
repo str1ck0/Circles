@@ -16,7 +16,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     get event_path(@event)
     assert_response :success
     assert_includes response.body, "rsvp-group"
-    assert_not_includes response.body, "event-chatroom-subscription"
+    assert_not_includes response.body, "EventChatroomChannel"
     assert_not_includes response.body, "Splitty"
   end
 
@@ -37,7 +37,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     sign_in @host
     get event_path(@event)
     assert_response :success
-    assert_includes response.body, "event-chatroom-subscription"
+    assert_includes response.body, "EventChatroomChannel"
     assert_includes response.body, "Splitty"
     assert_includes response.body, "Invite a circle"
   end

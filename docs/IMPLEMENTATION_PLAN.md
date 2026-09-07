@@ -21,8 +21,8 @@ without rebuilding the stack.
 | Phase 2 — RSVP states | ✅ PR [#4](https://github.com/str1ck0/Circles/pull/4) — merged |
 | Phase 3 — Invitations + notifications | ✅ PR [#5](https://github.com/str1ck0/Circles/pull/5) — merged |
 | Phase 4 — Profiles + user search | ✅ PR [#6](https://github.com/str1ck0/Circles/pull/6) — merged |
-| Phase 5 — UI revamp | 🔄 5a shell ✅ [#7](https://github.com/str1ck0/Circles/pull/7) · 5b circle ✅ [#8](https://github.com/str1ck0/Circles/pull/8) · 5c event ✅ [#9](https://github.com/str1ck0/Circles/pull/9) · 5d dashboard/profile/forms (`feat/ui-revamp-dashboard`) |
-| Phase 6 — Concern extraction + cleanup | ⬜ |
+| Phase 5 — UI revamp | ✅ 5a [#7](https://github.com/str1ck0/Circles/pull/7) · 5b [#8](https://github.com/str1ck0/Circles/pull/8) · 5c [#9](https://github.com/str1ck0/Circles/pull/9) · 5d [#10](https://github.com/str1ck0/Circles/pull/10) |
+| Phase 6 — Concern extraction + cleanup | 🔄 `chore/concern-extraction-cleanup` |
 
 ---
 
@@ -135,13 +135,22 @@ orbit/ring motif, the dark ground and the orange accent.
   The text-scramble and hello controllers, the legacy orbit CSS and the last shell
   compatibility block are gone.
 
-## Phase 6 — Concern extraction + cleanup
+## Phase 6 — Concern extraction + cleanup 🔄
 
-Only once Phases 1–3 have settled the behaviour on both sides of the mirror:
+- The circle/event mirror now shares one implementation (audit DUP-01): `ChatMessage`
+  and `SpotifyEmbed` model concerns (with validations both sides lacked), a
+  `ChatroomChannel` base, `ChatMessagesController` and `PlaylistsController` bases, the
+  `shared/_chat_message` partial and a single `chatroom-subscription` Stimulus controller.
+- Favicon lives in `app/assets/images/favicon.svg`; the home feed is capped at 30 upcoming
+  events; the dead `gradient` controller and leftover console logging are gone.
+- README rewritten for the app as it is now.
 
-- Shared concern for membership checks, message posting, playlist creation (audit DUP-01).
-- Move the favicon into the repo's assets.
-- Paginate/limit the home feed.
+## What's next (ideas, not commitments)
+
+- Event editing UI (the `update` action exists; there's no form yet) and event deletion.
+- Leave a circle / remove a member; transfer ownership.
+- Pagination for chat history and the people directory.
+- System tests for the chat and RSVP flows (Capybara is already in the Gemfile).
 
 ---
 
