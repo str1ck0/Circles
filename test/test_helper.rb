@@ -44,7 +44,8 @@ class ActiveSupport::TestCase
     }.merge(attrs))
     event.circles = circles
     event.save!
-    ([host] + attendees).uniq.each { |user| UserEvent.find_or_create_by!(user: user, event: event) }
+    UserEvent.create!(user: host, event: event, status: :going)
+    attendees.each { |user| UserEvent.find_or_create_by!(user: user, event: event) }
     event
   end
 end

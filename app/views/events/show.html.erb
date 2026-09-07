@@ -1,5 +1,5 @@
 <% event_policy = policy(@event) %>
-<div class="event-header" data-controller="attend" data-attend-url-value="<%= event_user_events_url(@event) %>">
+<div class="event-header" data-controller="rsvp" data-rsvp-url-value="<%= event_user_events_url(@event) %>">
   <div class="event-header-left">
     <h1><%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %></h1>
   </div>
@@ -10,7 +10,8 @@
     <div class="event-header-middle-info">
       <p>
         <i class="fa-solid fa-user-group"></i>
-        <span data-attend-target="userCount"><%= @event.users.size %></span>
+        <span data-rsvp-target="count" data-status="going"><%= @rsvp_counts["going"] %></span> going
+        <span class="rsvp-maybe-count">· <span data-rsvp-target="count" data-status="maybe"><%= @rsvp_counts["maybe"] %></span> maybe</span>
         <% if @event.private? %>
           <i class="fa-solid fa-lock"></i> Private
         <% else %>
@@ -21,13 +22,17 @@
     </div>
   </div>
   <div class="event-header-right">
-    <div class="event-header-right-attending">
-      <% if event_policy.rsvp? %>
-        <%= link_to "Attend Event", event_user_events_path(@event), data: { turbo_method: :post, action: "click->attend#clicky" }, class:"btn btn-success loool" %>
-      <% elsif event_policy.attendee? %>
-        <span class="btn btn-success loool"><i class="fa-solid fa-check"></i> You're going</span>
-      <% end %>
-    </div>
+    <% if event_policy.rsvp? %>
+      <div class="rsvp-group" role="group" aria-label="RSVP">
+        <% { "going" => "Going", "maybe" => "Maybe", "declined" => "Can't go" }.each do |status, label| %>
+          <button type="button"
+                  class="rsvp-button <%= 'is-active' if @user_event&.status == status %>"
+                  data-rsvp-target="button"
+                  data-status="<%= status %>"
+                  data-action="click->rsvp#choose"><%= label %></button>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </div>
 <div class="event-main-container">
@@ -72,14 +77,14 @@
                 </div>
               <% end %>
             </div>
-            <%= simple_form_for [@event, @event_message], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "d-flex" } do |f| %>
+            <%= simple_form_for [@event, EventMessage.new], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "d-flex" } do |f| %>
             <%= f.input :content, label: false, placeholder: "Message #{@event.title}", wrapper_html: {class: "flex-grow-1"} %>
             <%= f.submit "Send", class: "global-button-chat" %>
             <% end %>
           </div>
         <% else %>
           <div class="event-show-chatroom">
-            <p class="p-3">Attend the event to join the chat.</p>
+            <p class="p-3">RSVP to join the chat.</p>
           </div>
         <% end %>
       </div>
@@ -138,10 +143,10 @@
             <%= simple_form_for [@event, @payment] do |f| %>
               <%= f.input :amount %>
               <%= f.input :description %>
-              <%= f.association :user_event, label: "Payer", collection: @event.user_events, label_method: :user_name, required: false %>
+              <%= f.association :user_event, label: "Payer", collection: @going_user_events, label_method: :user_name, required: false %>
               <p>Who's splittin' this?</p>
               <div class="potential-splitters mb-3">
-                <%= f.association :user_events, as: :check_boxes, collection: @event.user_events, label: "", label_method: :user_name %>
+                <%= f.association :user_events, as: :check_boxes, collection: @going_user_events, label: "", label_method: :user_name %>
               </div>
               <%= f.submit "Pop it on the Splitty!", class: "global-button-splitty" %>
             <% end %>
@@ -172,7 +177,7 @@
       <div class="event-right-side-host-card">
         <%= link_to dashboard_path(@event.user) do %>
           <div class="event-right-side-host-body">
-            <%= image_tag @event.user.photo if @event.user.photo.attached? %>
+            <%= user_avatar @event.user %>
             <div class="event-right-side-host-info">
               <h4><%= @event.user.full_name %></h4>
               <p>Joined <%= @event.user.created_at.strftime("%b %Y") %></p>
@@ -222,15 +227,20 @@
         </div>
       </div>
       <div class="anker-member">
-        <h5>ATTENDEES</h5>
+        <h5>GUEST LIST</h5>
         <div class="anker-member-info">
-          <ul>
-            <% @event.users.each do |user| %>
-              <li><%= image_tag user.photo if user.photo.attached? %>
-                  <p><%= user.full_name %></p>
-              </li>
-            <% end %>
-          </ul>
+          <% { "going" => "Going", "maybe" => "Maybe", "invited" => "Invited", "declined" => "Can't make it" }.each do |status, heading| %>
+            <% guests = @guest_list[status] || [] %>
+            <% next if guests.empty? %>
+            <p class="guest-list-heading"><%= heading %> · <%= guests.size %></p>
+            <ul>
+              <% guests.each do |user_event| %>
+                <li><%= user_avatar user_event.user %>
+                    <p><%= user_event.user.full_name %></p>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
         </div>
       </div>
     </div>

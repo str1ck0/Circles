@@ -10,7 +10,7 @@ class EventsController < ApplicationController
     @event.circles = own_circles(event_params[:circle_ids])
     authorize @event
     if @event.save
-      @event.user_events.find_or_create_by!(user: current_user)
+      @event.user_events.create!(user: current_user, status: :going)
       @event.enrol_members_of(@event.circles)
       redirect_to event_path(@event), notice: "Event created!"
     else
@@ -31,7 +31,10 @@ class EventsController < ApplicationController
   def show
     @event = Event.find(params[:id])
     authorize @event
-    @user_event = UserEvent.new
+    @user_event = @event.rsvp_of(current_user)
+    @rsvp_counts = @event.rsvp_counts
+    @guest_list = @event.user_events.includes(:user).group_by(&:status)
+    @going_user_events = @event.user_events.going.includes(:user)
     @payment = Payment.new
     @event_message = EventMessage.new
     @event_playlist = EventPlaylist.new

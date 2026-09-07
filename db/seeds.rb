@@ -161,9 +161,13 @@ events = event_data.each_with_index.map do |data, i|
   attach_image(event, :photos, data[:photo])
   event.save!
 
-  # Attach the event to a circle and enrol that circle's members as attendees.
+  # Attach the event to a circle and put its members on the guest list with a
+  # realistic spread of RSVPs. The host is always going.
   CircleEvent.create!(circle: circle, event: event)
-  circle.users.each { |user| UserEvent.find_or_create_by!(user: user, event: event) }
+  UserEvent.create!(user: event.user, event: event, status: :going)
+  circle.users.where.not(id: event.user_id).each do |user|
+    UserEvent.create!(user: user, event: event, status: %i[going going going maybe invited declined].sample)
+  end
   print "."
   event
 end

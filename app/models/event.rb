@@ -26,7 +26,19 @@ class Event < ApplicationRecord
     user.present? && user_events.exists?(user_id: user.id)
   end
 
-  # Enrol every member of the given circles, skipping anyone already attending.
+  def rsvp_of(user)
+    user_events.find_by(user_id: user.id) if user
+  end
+
+  def going_count
+    user_events.select(&:going?).size
+  end
+
+  def rsvp_counts
+    UserEvent.statuses.keys.index_with { 0 }.merge(user_events.group(:status).count)
+  end
+
+  # Invite every member of the given circles, skipping anyone already on the guest list.
   def enrol_members_of(circles)
     user_ids = UserCircle.where(circle_id: circles.map(&:id)).distinct.pluck(:user_id)
     user_ids.each { |id| user_events.find_or_create_by!(user_id: id) }

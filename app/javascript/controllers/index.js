@@ -4,9 +4,6 @@
 
 import { application } from "./application"
 
-import AttendController from "./attend_controller"
-application.register("attend", AttendController)
-
 import CircleChatroomSubscriptionController from "./circle_chatroom_subscription_controller"
 application.register("circle-chatroom-subscription", CircleChatroomSubscriptionController)
 
@@ -33,6 +30,9 @@ application.register("map", MapController)
 
 import NeweventController from "./newevent_controller"
 application.register("newevent", NeweventController)
+
+import RsvpController from "./rsvp_controller"
+application.register("rsvp", RsvpController)
 
 import SearchUsersController from "./search_users_controller"
 application.register("search-users", SearchUsersController)

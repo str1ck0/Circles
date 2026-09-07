@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_09_07_173424) do
+ActiveRecord::Schema[7.0].define(version: 2026_09_07_182305) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -147,6 +147,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_09_07_173424) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "balance", default: 0
+    t.integer "status", default: 0, null: false
     t.index ["event_id"], name: "index_user_events_on_event_id"
     t.index ["user_id", "event_id"], name: "index_user_events_on_user_id_and_event_id", unique: true
     t.index ["user_id"], name: "index_user_events_on_user_id"

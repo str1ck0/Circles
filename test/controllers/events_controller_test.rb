@@ -15,7 +15,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     sign_in @circle_member
     get event_path(@event)
     assert_response :success
-    assert_includes response.body, "Attend Event"
+    assert_includes response.body, "rsvp-group"
     assert_not_includes response.body, "event-chatroom-subscription"
     assert_not_includes response.body, "SPLITTY"
   end
@@ -51,8 +51,8 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     end
     event = Event.order(:id).last
     assert_equal [@circle], event.circles
-    assert event.attendee?(@host)
-    assert event.attendee?(@circle_member)
+    assert event.rsvp_of(@host).going?
+    assert event.rsvp_of(@circle_member).invited?
     assert_not event.attendee?(@stranger)
   end
 

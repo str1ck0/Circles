@@ -17,8 +17,8 @@ without rebuilding the stack.
 | Core features | ✅ Done, verified in browser |
 | Deploy | ✅ **Live at https://circles-rpke.onrender.com** (Render + Neon + Upstash) |
 | Audit | ✅ [Findings report](https://claude.ai/code/artifact/65ee6d6f-ba2f-483d-94df-a0d33c79dfed) — 9 critical, 3 high, 1 medium, 3 low |
-| Phase 1 — Authorization foundation | 🔄 In progress |
-| Phase 2 — RSVP states | ⬜ |
+| Phase 1 — Authorization foundation | ✅ PR [#3](https://github.com/str1ck0/Circles/pull/3) — merged, live |
+| Phase 2 — RSVP states | 🔄 In progress (`feat/rsvp-states`) |
 | Phase 3 — Invitations + notifications | ⬜ |
 | Phase 4 — Profiles + user search | ⬜ |
 | Phase 5 — UI revamp | ⬜ |
@@ -42,11 +42,11 @@ without rebuilding the stack.
 
 ---
 
-## Phase 1 — Authorization foundation (`fix/authorization-foundation`)
+## Phase 1 — Authorization foundation ✅ (PR #3)
 
-Closes every AUTH finding and the three BUG findings from the audit in one coherent PR,
-and ships public-circle discovery at the same time so new signups have a way in (the
-`User#friends` cold-start problem described in the audit).
+Closed every AUTH finding and the three BUG findings from the audit in one PR, and shipped
+public-circle discovery at the same time so new signups have a way in (the `User#friends`
+cold-start problem described in the audit). Details, as built:
 
 - Add **Pundit**. `CirclePolicy` and `EventPolicy` carry every rule; join-table controllers
   authorize against the parent (`authorize @circle, :post_message?`), so there are only
@@ -68,12 +68,18 @@ and ships public-circle discovery at the same time so new signups have a way in 
   payment split test. Replace the stale `user_circles_controller_test.rb` scaffold.
 - Sticky footer on short pages (login/signup).
 
-## Phase 2 — RSVP states
+## Phase 2 — RSVP states 🔄
 
-`user_events.status` enum: `invited`, `going`, `maybe`, `declined` (default `invited`).
-Attaching a circle enrols members as `invited`; cards show the `going` count; the event
-page gets a three-state control replacing the binary "Attend". `attend_controller.js`
-becomes an RSVP controller.
+`user_events.status` enum: `invited` (default), `going`, `maybe`, `declined`. The
+migration backfills every pre-existing row to `going` (they were binary attendees).
+Attaching a circle puts members on the guest list as `invited`; the host is `going`.
+Cards show the `going` count; the event page has a Going / Maybe / Can't go control
+(`rsvp_controller.js`, replacing `attend_controller.js`) and a guest list grouped by
+status. `UserEventsController#create` upserts the current user's row.
+
+Being on the guest list in any state (including declined) still counts as an attendee
+for chat/playlists/payments — the guest list *is* the access list. Only `going` guests
+are offered as payers/splittees.
 
 ## Phase 3 — Invitations + notifications
 
