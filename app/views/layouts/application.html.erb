@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
-    <link rel="icon" href="https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668762627/development/CircleLogoBlack_pjkfss.svg"> 
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
-    <title>Circles</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title><%= content_for?(:title) ? "#{yield(:title)} · Circles" : "Circles" %></title>
+    <link rel="icon" href="https://res.cloudinary.com/dhyxfzmqi/image/upload/v1668762627/development/CircleLogoBlack_pjkfss.svg">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -16,7 +17,14 @@
   <body data-controller="cursorlight">
     <%= render "shared/flashes" %>
     <div class="mouse-cursor-gradient-tracking">
-      <%= yield %>
+      <% if user_signed_in? %>
+        <div class="app-shell">
+          <%= render "shared/sidebar" %>
+          <main class="app-main"><%= yield %></main>
+        </div>
+      <% else %>
+        <%= yield %>
+      <% end %>
     </div>
     <%= render "shared/footer" unless @skip_footer %>
   </body>

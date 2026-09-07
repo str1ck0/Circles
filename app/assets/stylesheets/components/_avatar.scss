@@ -1,37 +1,68 @@
-.circle-avatar {
-  width: 70px;
+// Ringed avatars are the app's signature. Set the ring colour per element with
+// style="--ring: #hex" (a circle's border_color, or the accent for people).
+
+.ring-avatar {
+  --ring: var(--accent);
+  --size: 64px;
+  width: var(--size);
+  height: var(--size);
   border-radius: 50%;
-  border: #ff9d00 3px solid;
-  padding: 4px;
-  height: 70px;
   object-fit: cover;
-  flex-direction: column;
+  padding: 3px;
+  background: var(--bg-elevated);
+  border: 2.5px solid var(--ring);
+  display: block;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  a:hover > & {
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 22%, transparent);
+  }
 }
 
-.random-color {
-  border-color: rgb(random(255), random(255), random(255)) !important;
+.ring-avatar-xs { --size: 32px; padding: 2px; border-width: 2px; }
+.ring-avatar-sm { --size: 44px; padding: 2px; border-width: 2px; }
+.ring-avatar-md { --size: 64px; }
+.ring-avatar-lg { --size: 96px; padding: 4px; border-width: 3px; }
+.ring-avatar-xl { --size: 128px; padding: 5px; border-width: 3px; }
+
+// Older markup: keep working, now driven by --ring where a style attribute sets one.
+.circle-avatar {
+  --ring: var(--accent);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid var(--ring);
+  padding: 4px;
+  object-fit: cover;
+  background: var(--bg-elevated);
 }
 
 .avatar {
   width: 40px;
+  height: 40px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
 .avatar-large {
   width: 56px;
+  height: 56px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
-.avatar-bordered {
-  width: 40px;
-  border-radius: 50%;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  border: white 1px solid;
-}
+.avatar-stack {
+  display: inline-flex;
 
-.avatar-square {
-  width: 40px;
-  border-radius: 0px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  border: white 1px solid;
+  img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--surface);
+    margin-left: -8px;
+
+    &:first-child { margin-left: 0; }
+  }
 }

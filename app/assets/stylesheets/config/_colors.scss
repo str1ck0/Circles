@@ -1,10 +1,34 @@
-// Define variables for your color scheme
+// Ground: deep charcoal with a slight blue bias, never pure black.
+$bg: #111217;
+$bg-elevated: #17181e;
+$surface: #1f2028;
+$surface-2: #272833;
+$surface-3: #30313d;
+$border: rgba(255, 255, 255, 0.08);
+$border-strong: rgba(255, 255, 255, 0.16);
 
-// For example:
-$red: #FD1015;
-$blue: #0D6EFD;
-$yellow: #FFC65A;
-$orange: #E67E22;
-$green: #1EDD88;
-$gray: #0E0000;
-$light-gray: #F4F4F4;
+$text: #f3f3f7;
+$text-dim: rgba(243, 243, 247, 0.64);
+$text-faint: rgba(243, 243, 247, 0.4);
+
+// The one accent: the orange that has always been Circles' highlight.
+$accent: #ff9d00;
+$accent-ink: #171310;
+$accent-soft: rgba(255, 157, 0, 0.14);
+
+$danger: #ff5c7a;
+$success: #52e3b3;
+$info: #52e3e1;
+$warning: #ffbe0b;
+
+// Ring palette: the colours a circle can pick as its border (mirrors CirclesController#colors).
+$ring-colors: #33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff;
+
+// Legacy names still referenced by older partials.
+$red: $danger;
+$blue: #3a86ff;
+$yellow: $warning;
+$orange: $accent;
+$green: $success;
+$gray: $bg;
+$light-gray: $text;

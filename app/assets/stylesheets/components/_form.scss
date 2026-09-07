@@ -1,98 +1,137 @@
-.container-form {
+// Auth pages: a single centred card.
+.auth {
+  flex: 1 0 auto;
   display: flex;
-  width: 30vw;
-  margin: 0 auto;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-content: center;
-  margin-top: 3%;
-  margin-bottom: 3%;
+  padding: 48px var(--gutter);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px 32px 28px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-2);
+
+  .auth-logo {
+    display: block;
+    width: 140px;
+    margin: 0 auto 22px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0 0 4px;
+  }
+
+  .auth-lede {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin: 0 0 24px;
+  }
+
+  .form-actions { margin-top: 8px; }
+  .form-actions .btn { width: 100%; }
+}
+
+.auth-links {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+
+  a { color: var(--text); }
+  a:hover { color: var(--accent); }
+}
+
+// Longer forms (new circle, new event, edit profile)
+.container-form {
+  width: 100%;
+  max-width: 560px;
+  margin: 40px auto;
+  padding: 32px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
 
   h2 {
     text-align: center;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 24px;
   }
+
+  h3 { font-size: 1rem; }
 }
 
+.form-group, .mb-3 { margin-bottom: 1rem; }
+
+.form-control-file,
+input[type='file'] {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+// Circle colour picker
 .color-select-wrapper {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
   align-items: center;
+
+  .form-check { padding: 0; margin: 0; }
 
   .form-check-input {
     position: absolute;
     transform: scale(0);
   }
+
   .form-check-input + label {
     cursor: pointer;
     font-size: 0;
-    width: 25px;
-    height: 25px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    transition: scale 0.3s;
+    border: 2px solid transparent;
+    transition: transform 0.15s ease, border-color 0.15s ease;
   }
 
   .form-check-input:checked + label {
-    border: 3px solid white;
-    scale: 1.2;
+    border-color: white;
+    transform: scale(1.2);
   }
 
   .form-check-input:hover + label {
-    scale: 1.2;
+    transform: scale(1.15);
   }
 }
 
-#circle_border_color_33a8c7 + label {
-  background-color: #33a8c7;
+@each $color in $ring-colors {
+  #circle_border_color_#{str-slice(inspect($color), 2)} + label {
+    background-color: $color;
+  }
 }
 
-#circle_border_color_52e3e1 + label {
-  background-color: #52e3e1;
+// Tom Select on a dark ground
+.ts-control,
+.ts-dropdown {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border-strong) !important;
 }
 
-#circle_border_color_a0e426 + label {
-  background-color: #a0e426;
-}
-
-#circle_border_color_fdf148 + label {
-  background-color: #fdf148;
-}
-
-#circle_border_color_ffab00 + label {
-  background-color: #ffab00;
-}
-
-#circle_border_color_f77976 + label {
-  background-color: #f77976;
-}
-
-#circle_border_color_f050ae + label {
-  background-color: #f050ae;
-}
-
-#circle_border_color_d883ff + label {
-  background-color: #d883ff;
-}
-
-#circle_border_color_9336fd + label {
-  background-color: #9336fd;
-}
-
-#circle_border_color_ffbe0b + label {
-  background-color: #ffbe0b;
-}
-
-#circle_border_color_fb5607 + label {
-  background-color: #fb5607;
-}
-
-#circle_border_color_ff006e + label {
-  background-color: #ff006e;
-}
-
-#circle_border_color_8338ec + label {
-  background-color: #8338ec;
-}
-
-#circle_border_color_3a86ff + label {
-  background-color: #3a86ff;
-}
+.ts-dropdown .option:hover,
+.ts-dropdown .active { background: var(--surface-2) !important; color: var(--text) !important; }
+.ts-control input { color: var(--text) !important; }
+.ts-wrapper.multi .ts-control > div { background: var(--surface-3); color: var(--text); border-radius: var(--r-pill); }

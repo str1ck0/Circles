@@ -1,26 +1,66 @@
-// This is where you override default Bootstrap variables
-// 1. All Bootstrap variables are here => https://github.com/twbs/bootstrap/blob/master/scss/_variables.scss
-// 2. These variables are defined with default value (see https://robots.thoughtbot.com/sass-default)
-// 3. You can override them below!
+// Bootstrap overrides — every default Bootstrap component (forms, modals, alerts) picks
+// up the dark palette from here so we don't restyle them one by one.
 
-// General style
 $font-family-sans-serif: $body-font;
 $headings-font-family: $headers-font;
-$body-bg: $light-gray;
+$headings-font-weight: 600;
 $font-size-base: 1rem;
+$line-height-base: 1.55;
 
-// Colors
-$body-color: $gray;
-$primary: $blue;
-$success: $green;
-$info: $yellow;
-$danger: $red;
-$warning: $orange;
+$body-bg: $bg;
+$body-color: $text;
 
-// Buttons & inputs' radius
-$border-radius: 2px;
-$border-radius-lg: 2px;
-$border-radius-sm: 2px;
+$primary: $accent;
+$success: $success;
+$info: $info;
+$danger: $danger;
+$warning: $warning;
+$secondary: $surface-3;
 
-// Override other variables below!
+$link-color: $text;
+$link-hover-color: $accent;
+$link-decoration: none;
+
+$border-radius: 10px;
+$border-radius-lg: 14px;
+$border-radius-sm: 8px;
+$border-color: $border-strong;
+
+$input-bg: $surface;
+$input-color: $text;
+$input-border-color: $border-strong;
+$input-focus-border-color: $accent;
+$input-focus-box-shadow: 0 0 0 3px $accent-soft;
+$input-placeholder-color: $text-faint;
+$input-padding-y: 0.6rem;
+$input-padding-x: 0.85rem;
+$form-label-font-family: $headers-font;
+$form-label-font-size: 0.8rem;
+$form-label-color: $text-dim;
+$form-text-color: $text-faint;
+
+$form-check-input-bg: $surface;
+$form-check-input-border: 1px solid $border-strong;
+$form-check-input-checked-bg-color: $accent;
+$form-check-input-checked-border-color: $accent;
+$form-select-bg: $surface;
+$form-select-color: $text;
+$form-select-border-color: $border-strong;
+
+$modal-content-bg: $surface;
+$modal-content-color: $text;
+$modal-content-border-color: $border;
+$modal-header-border-color: $border;
+$modal-footer-border-color: $border;
+$modal-backdrop-opacity: 0.7;
+$btn-close-color: $text;
+
+$code-color: $accent;
+$code-font-size: 0.9em;
+
+$btn-font-family: $headers-font;
+$btn-font-weight: 600;
+$btn-padding-y: 0.55rem;
+$btn-padding-x: 1.1rem;
+
 $avatar-size: 150px;

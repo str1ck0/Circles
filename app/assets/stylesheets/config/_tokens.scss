@@ -1,0 +1,36 @@
+// Custom properties so views can set per-element values (e.g. a circle's ring colour)
+// and so components read from one place.
+:root {
+  --bg: #{$bg};
+  --bg-elevated: #{$bg-elevated};
+  --surface: #{$surface};
+  --surface-2: #{$surface-2};
+  --surface-3: #{$surface-3};
+  --border: #{$border};
+  --border-strong: #{$border-strong};
+
+  --text: #{$text};
+  --text-dim: #{$text-dim};
+  --text-faint: #{$text-faint};
+
+  --accent: #{$accent};
+  --accent-ink: #{$accent-ink};
+  --accent-soft: #{$accent-soft};
+  --danger: #{$danger};
+  --success: #{$success};
+
+  --font-display: #{$headers-font};
+  --font-body: #{$body-font};
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+
+  --sidebar-w: 248px;
+  --content-max: 1280px;
+  --gutter: clamp(16px, 3vw, 40px);
+}

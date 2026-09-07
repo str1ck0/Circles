@@ -1,72 +1,106 @@
-<div class="main-container">
-  <div class="side-container">
-    <div class="logo-container">
-      <%= image_tag "Logo/Circles_Logo.svg", width: "190", class:"white-color" %>
-    </div>
-    <div class="orbit-container">
-      <div class="login-button">
-        <% unless user_signed_in? %>
-          <%= link_to "Login", new_user_session_path, class: "hover-underline-animation login-button" %>
-        <% end %>
+<% if user_signed_in? %>
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Hey <%= current_user.first_name %></p>
+        <h1>What's on</h1>
       </div>
-      <% if user_signed_in? %>
-        <div class="profile-container">
-          <%= link_to user_path(current_user), title: "Your profile" do %>
-            <% if current_user.photo.attached? %>
-              <%= image_tag current_user.photo, class: "circle-avatar" %>
-            <% else %>
-              <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: "circle-avatar" %>
-            <% end %>
-          <% end %>
-        </div>
-        <div id="circle-orbit-container">
-          <!-- Circles closest to the central point -->
-          <div id="inner-orbit">
-            <div class="inner-orbit-cirlces"></div>
-          </div>
-          <!-- Circles second closest to the central point -->
-          <div id="middle-orbit">
-            <div class="middle-orbit-cirlces"></div>
-          </div>
-        </div>
-        <div class="links-container">
+      <div class="page-actions">
+        <%= link_to new_circle_path, class: "btn-accent btn-sm" do %><i class="fa-solid fa-plus"></i> New circle<% end %>
+        <%= link_to new_event_path, class: "btn-ghost btn-sm" do %><i class="fa-regular fa-calendar-plus"></i> New event<% end %>
       </div>
-      <% end %>
-      <% if user_signed_in? %>
-        <div class="spacer"></div>
-        <%= link_to "New Circle", new_circle_path, class: "hover-underline-animation" %>
-        <%= link_to "New Event", new_event_path, class: "hover-underline-animation" %>
-        <%= link_to "Find people", users_path, class: "hover-underline-animation" %>
-        <%= link_to notifications_path, class: "hover-underline-animation notifications-link" do %>
-          Notifications<% if unread_notifications_count.positive? %> <span class="unread-badge"><%= unread_notifications_count %></span><% end %>
-        <% end %>
-      <% end %>
-    </div>
-    <div class="circles-container">
-      <% if user_signed_in? %>
-        <p>YOUR CIRCLES</p>
-      <% else %>
-        <p>JOIN A CIRCLE</p>
-      <% end %>
-      <div class="circle-grid">
-        <% @circles.each do |circle| %>
-          <%= render "shared/circle_avatar", circle: circle %>
-        <% end %>
-      </div>
-      <% if @discover_circles.any? %>
-        <p class="mt-3">DISCOVER</p>
-        <div class="circle-grid">
+    </header>
+
+    <% if @events.any? %>
+      <section class="feed-section">
+        <h2 class="section-title">Upcoming</h2>
+        <%= render "shared/home-card" %>
+      </section>
+    <% end %>
+
+    <% if @discover_circles.any? %>
+      <section class="feed-section">
+        <h2 class="section-title">Discover circles</h2>
+        <div class="circle-cards">
           <% @discover_circles.each do |circle| %>
-            <%= render "shared/circle_avatar", circle: circle %>
+            <%= render "shared/circle_card", circle: circle %>
           <% end %>
         </div>
-      <% end %>
-      <% if user_signed_in? %>
-        <div style="margin-top: 15px;"><%= link_to "Logout", destroy_user_session_path, data: {turbo_method: :delete}, class: "hover-underline-animation" %></div>
-      <% end %>
-    </div>
+      </section>
+    <% end %>
+
+    <% if @past_events.any? %>
+      <section class="feed-section">
+        <h2 class="section-title">Past</h2>
+        <% @events = @past_events %>
+        <%= render "shared/home-card" %>
+      </section>
+    <% end %>
+
+    <% if @events.empty? && @discover_circles.empty? && @past_events.empty? %>
+      <div class="empty-state">
+        <h3>Nothing here yet</h3>
+        <p>Start a circle for your crew, or find people you know.</p>
+        <%= link_to "Create a circle", new_circle_path, class: "btn-accent" %>
+        <%= link_to "Find people", users_path, class: "btn-ghost" %>
+      </div>
+    <% end %>
   </div>
-  <div class="feed-container" data-controller="gradient">
-      <%= render "shared/home-card" %>
+<% else %>
+  <div class="landing">
+    <section class="landing-hero">
+      <div class="landing-copy">
+        <%= image_tag "Logo/Circles_Logo.svg", class: "landing-logo white-color", alt: "Circles" %>
+        <h1>Your people, in orbit.</h1>
+        <p>Private circles for your crew, open clubs for everyone else. Plan events, chat live, and split the bill without the spreadsheet.</p>
+        <div class="landing-cta">
+          <%= link_to "Create an account", new_user_registration_path, class: "btn-accent" %>
+          <%= link_to "Log in", new_user_session_path, class: "btn-ghost" %>
+        </div>
+        <p class="landing-note">Try the demo: <code>benten@gmail.com</code> / <code>password</code></p>
+      </div>
+      <div class="orbit" aria-hidden="true">
+        <div class="orbit-core">
+          <%= image_tag "avatar/CirclesAvatar.png", class: "ring-avatar ring-avatar-lg", alt: "" %>
+        </div>
+        <% satellites = @circles.select { |c| c.photo.attached? }.first(3) %>
+        <div class="orbit-ring orbit-ring-1">
+          <span class="orbit-satellite is-dot"></span>
+        </div>
+        <div class="orbit-ring orbit-ring-2">
+          <% if satellites[0] %>
+            <span class="orbit-satellite" style="--ring: <%= satellites[0].border_color %>"><%= image_tag satellites[0].photo, alt: "" %></span>
+          <% end %>
+          <span class="orbit-satellite is-dot at-half"></span>
+        </div>
+        <div class="orbit-ring orbit-ring-3">
+          <% if satellites[1] %>
+            <span class="orbit-satellite at-quarter" style="--ring: <%= satellites[1].border_color %>"><%= image_tag satellites[1].photo, alt: "" %></span>
+          <% end %>
+          <% if satellites[2] %>
+            <span class="orbit-satellite at-three-quarter" style="--ring: <%= satellites[2].border_color %>"><%= image_tag satellites[2].photo, alt: "" %></span>
+          <% end %>
+          <span class="orbit-satellite is-dot"></span>
+        </div>
+      </div>
+    </section>
+
+    <% if @circles.any? %>
+      <section class="feed-section">
+        <h2 class="section-title">Open circles</h2>
+        <div class="circle-cards">
+          <% @circles.each do |circle| %>
+            <%= render "shared/circle_card", circle: circle %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @events.any? %>
+      <section class="feed-section">
+        <h2 class="section-title">Happening soon</h2>
+        <%= render "shared/home-card" %>
+      </section>
+    <% end %>
   </div>
-</div>
+<% end %>
