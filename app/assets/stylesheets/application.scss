@@ -23,6 +23,15 @@
 
 body {
   background-color: #18191c;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Everything above the footer grows to fill the viewport so the footer sits at
+// the bottom even on short pages (login, sign up).
+.mouse-cursor-gradient-tracking {
+  flex: 1 0 auto;
 }
 
 .red-border {

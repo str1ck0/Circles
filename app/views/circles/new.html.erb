@@ -3,16 +3,12 @@
   <%= simple_form_for @circle do |f| %>
     <%= f.input :name %>
     <%= f.input :photo, as: :file %>
-    <%= f.input :private, as: :radio_buttons, collection: [['Yes',true], ['No',false]], required: true %>
+    <%= f.input :private, as: :radio_buttons, collection: [['Private — invite only', true], ['Public — anyone can join', false]], required: true %>
     <%= f.input :banner, as: :file %>
     <%= f.input :border_color, as: :radio_buttons, collection_wrapper_tag: "div", collection_wrapper_class: "color-select-wrapper",
                 label: "Choose a color for your circle" , collection: @colors, item_wrapper_class: "circle-color-input",
                 input_html: { class: 'multiselectuser', value: ""}%>
-    <% if @user_names.length <= 0 %>
-      <%= "You have no friends to invite" %>
-    <% else %>
-      <%= f.association :users, label: "Who do you want to add to your circle?" , collection: User.all, label_method: :full_name, input_html: { class: 'multiselectuser'}%>
-    <% end %>
+    <%= f.association :users, label: "Who do you want to add to your circle?", collection: User.where.not(id: current_user.id), label_method: :full_name, input_html: { class: 'multiselectuser'} %>
     <%= f.submit %>
   <% end %>
 </div>

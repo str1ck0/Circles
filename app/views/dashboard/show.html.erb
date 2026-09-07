@@ -5,33 +5,36 @@
 <div class="dashboard-main-container">
   <div class="dashboard-left-side">
     <div class="dashboard-profile">
-      <%= image_tag @user.photo %>
+      <%= image_tag @user.photo if @user.photo.attached? %>
       <div class="dashboard-profile-info">
         <div class="dashboard-profile-info-left-block">
-        <h2><%= @user.first_name %> <%= @user.last_name %></h2>
-        <p>Joined <%= @user.created_at.strftime("%a, %b %d") %></p>
+        <h2><%= @user.full_name %></h2>
+        <p>Joined <%= @user.created_at.strftime("%b %Y") %></p>
         </div>
-        <%= link_to edit_user_registration_path(current_user) do %>
-          <p><i class='fa-solid fa-pen'></i></p>
+        <% if @user == current_user %>
+          <%= link_to edit_user_registration_path do %>
+            <p><i class='fa-solid fa-pen'></i></p>
+          <% end %>
         <% end %>
       </div>
     </div>
     <div class="dashboard-orbits">
       <div class="dashboard-orbit-header">
-        <h4>NOTIFICATIONS</h4>
-        <i class="fa-solid fa-circle"></i>
-        <h5>3</h5>
+        <h4>PEOPLE</h4>
       </div>
       <div class="dashboard-orbits-body">
         <div id="circle-orbit-container">
           <div class="middle-orbit-cirlces-4">
-            <%= image_tag @user.photo %>
+            <%= image_tag @user.photo if @user.photo.attached? %>
           </div>
-          <!-- Circles second closest to the central point -->
           <div id="middle-orbit">
-            <div class="middle-orbit-cirlces"><%= image_tag User.all.sample.photo %><%= image_tag "MsgLrgLS.svg", class:"chatbox-svg" %><p class="chatbox-message">Smash?</p></div>
-            <div class="middle-orbit-cirlces-2"><%= image_tag User.all.sample.photo %><%= image_tag "MsgLrgLS.svg", class:"chatbox-svg" %><p class="chatbox-message">Hottie!</p></div>
-            <div class="middle-orbit-cirlces-3"><%= image_tag User.all.sample.photo %><%= image_tag "MsgSmlLS.svg", class:"chatbox-svg" %><p class="chatbox-message-3">🙌</p></div>
+            <% @orbit_users.each_with_index do |person, index| %>
+              <div class="<%= index.zero? ? 'middle-orbit-cirlces' : "middle-orbit-cirlces-#{index + 1}" %>">
+                <%= link_to dashboard_path(person), title: person.full_name do %>
+                  <%= image_tag person.photo if person.photo.attached? %>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
@@ -41,11 +44,11 @@
     <div class="dashboard-discover-events">
       <h5>DISCOVER</h5>
       <div class="dashboard-discover-carousel">
-        <section class="splide splide-content" aria-label="Splide Basic HTML Example" data-controller="slider">
+        <section class="splide splide-content" aria-label="Events you can see" data-controller="slider">
           <div class="splide__track">
             <ul class="splide__list">
-              <% @all_events.each do |event| %>
-                <li class="splide__slide"><%= image_tag event.photos[0] %></li>
+              <% @discover_events.select { |event| event.photos.attached? }.each do |event| %>
+                <li class="splide__slide"><%= link_to image_tag(event.photos.first), event_path(event) %></li>
               <% end %>
             </ul>
           </div>
@@ -57,14 +60,9 @@
     <div class="dashboard-invitations">
       <h5>INVITES</h5>
       <div class="dashboard-invitations-section">
-        <% 4.times do %>
-          <div class="dashboard-invitations-info">
-            <p><%= User.all.sample.first_name %> invited you to <strong><%= link_to "#{Event.all.sample.title}", event_path(Event.all.last)  %></strong></p>
-            <div class="dashboard-invitations-info-buttons d-flex">
-              <p>Accept</p>
-            </div>
-          </div>
-        <% end %>
+        <div class="dashboard-invitations-info">
+          <p>No pending invites.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -72,7 +70,7 @@
     <div class="dashboard-middle-top">
       <div class="dashboard-next-event">
         <h5>NEXT EVENTS</h5>
-        <% if @next_event != nil %>
+        <% if @next_event %>
           <%= link_to event_path(@next_event) do %>
             <div class="dashboard-next-event-info">
               <p style="margin-top: 5px"><strong><%= @next_event.title %></strong></p>
@@ -86,42 +84,43 @@
         <% end %>
       </div>
       <div class="dashboard-circles">
-        <h5>YOUR CIRCLES</h5>
+        <h5><%= @user == current_user ? "YOUR CIRCLES" : "CIRCLES" %></h5>
         <div class="dash-circle-grid">
-          <% @circles.each do |circle|%>
-            <%= link_to circle_path(circle) do %>
-              <% if circle.photo.attached? %>
-                <%= image_tag circle.photo, class: "circle-avatar", style: "border-color: #{circle.border_color}", alt: "Circle Avatar" %>
-              <% else %>
-                <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: "circle-avatar" %>
-              <% end %>
-            <% end %>
+          <% @circles.each do |circle| %>
+            <%= render "shared/circle_avatar", circle: circle %>
           <% end %>
         </div>
       </div>
     </div>
     <div class="dashboard-middle-bottom">
-            <div class="dashboard-show-spotify-playlists">
+      <div class="dashboard-show-spotify-playlists">
         <div class="spotify-playlists-header">
-          <h5>YOUR PLAYLISTS</h5>
-          <!-- Playlist Button trigger modal -->
-          <button type="button" class="global-button" id="playlist-button", data-bs-toggle="modal" data-bs-target="#addPlaylist">
-            <h5>+</h5>
-          </button>
+          <h5><%= @user == current_user ? "YOUR PLAYLISTS" : "PLAYLISTS" %></h5>
+          <% if @circle && policy(@circle).add_playlist? %>
+            <!-- Playlist Button trigger modal -->
+            <button type="button" class="global-button" id="playlist-button" data-bs-toggle="modal" data-bs-target="#addPlaylist">
+              <h5>+</h5>
+            </button>
+          <% end %>
         </div>
         <div class="playlists-grid">
-          <% @circle.circle_playlists.each do |playlist| %>
-            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/<%=playlist.embed_url%>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+          <% if @circle %>
+            <% @circle.circle_playlists.each do |playlist| %>
+              <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/<%=playlist.embed_url%>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            <% end %>
+          <% else %>
+            <p>Join a circle to see its playlists.</p>
           <% end %>
         </div>
 
+        <% if @circle && policy(@circle).add_playlist? %>
           <!-- Modal -->
           <div class="modal fade" id="addPlaylist" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddPlaylistLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
               <div class="modal-content modal-content-circle-show">
                 <div class="modal-header">
                   <i class="fa-brands fa-spotify"></i>
-                  <h1 class="modal-title fs-5" id="staticBackdropLabel">Add a Playlist</h1>
+                  <h1 class="modal-title fs-5" id="AddPlaylistLabel">Add a Playlist</h1>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body modal-body-content">
@@ -136,7 +135,7 @@
               </div>
             </div>
           </div>
-        </div>
+        <% end %>
       </div>
     </div>
   </div>

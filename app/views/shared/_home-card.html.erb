@@ -1,47 +1,26 @@
 <div class="cards-event">
   <% @events.each do |event| %>
     <%= link_to event_path(event) do %>
-      <% if event.photos.attached? %>
-        <div class="event-card">
-          <div class="title-container">
-            <p><%= event.title.upcase %></p>
-          </div>
-          <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%= url_for(event.photos.first) %>);">
-            <div class="icons">
-              <div class="attending">
-                <i class="fa-solid fa-user-group"></i>
-                <p><%= event.users.count %></p>
-              </div>
-              <% if event.private  %>
-                <i class="fa-solid fa-circle"> </i>
-              <% else %>
-                <i class="fa-regular fa-circle"></i>
-              <% end %>
-              <p><%= event.start_date.strftime("%m/%d") %></p>
+      <div class="event-card">
+        <div class="title-container">
+          <p><%= event.title.upcase %></p>
+        </div>
+        <% background = event.photos.attached? ? url_for(event.photos.first) : asset_path('avatar/CirclesAvatar.png') %>
+        <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%= background %>);">
+          <div class="icons">
+            <div class="attending">
+              <i class="fa-solid fa-user-group"></i>
+              <p><%= event.users.size %></p>
             </div>
+            <% if event.private? %>
+              <i class="fa-solid fa-circle"> </i>
+            <% else %>
+              <i class="fa-regular fa-circle"></i>
+            <% end %>
+            <p><%= event.start_date.strftime("%m/%d") %></p>
           </div>
         </div>
-      <% else %>
-        <div class="event-card">
-          <div class="title-container">
-            <p><%= event.title.upcase %></p>
-          </div>
-          <div class="image-icon-container" style="background-image: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url(<%= asset_path('avatar/CirclesAvatar.png') %>);">
-            <div class="icons">
-              <div class="attending">
-                <i class="fa-solid fa-user-group"></i>
-                <p><%= event.users.count %></p>
-              </div>
-              <% if event.private  %>
-                <i class="fa-solid fa-circle"> </i>
-              <% else %>
-                <i class="fa-regular fa-circle"></i>
-              <% end %>
-              <p><%= event.start_date.strftime("%m/%d") %></p>
-            </div>
-          </div>
-        </div>
-      <% end %>
+      </div>
     <% end %>
   <% end %>
 </div>

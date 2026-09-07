@@ -13,4 +13,14 @@ class Circle < ApplicationRecord
   validates :photo, presence: true
   validates :banner, presence: true
   validates :border_color, presence: true
+
+  scope :publicly_visible, -> { where(private: false) }
+
+  def public?
+    !private?
+  end
+
+  def member?(user)
+    user.present? && user_circles.exists?(user_id: user.id)
+  end
 end

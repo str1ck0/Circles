@@ -1,14 +1,16 @@
 class UsersController < ApplicationController
   def profile
-    @events = Event.all
+    skip_authorization
+    @events = policy_scope(Event).includes(:users, photos_attachments: :blob).order(:start_date)
   end
 
   def index
-    @users = User.all
     @circle = Circle.find(params[:circle_id])
+    authorize @circle, :add_member?
+    @users = User.where.not(id: @circle.users.select(:id))
 
     if params[:query].present?
-      @users = @users.where("first_name ILIKE ? OR last_name ILIKE ?", "%#{params[:query]}%", "%#{params[:query]}%")
+      @users = @users.where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{params[:query]}%")
     end
 
     respond_to do |format|

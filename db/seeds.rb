@@ -223,9 +223,10 @@ events.first(4).each do |event|
     payment = Payment.create!(user_event: payer, description: Faker::Commerce.product_name, amount: amount)
     payment.user_events = splittees
 
-    split_amount = amount / (splittees.count + 1)
-    payer.update!(balance: payer.balance + amount - split_amount)
-    splittees.each { |se| se.update!(balance: se.balance - split_amount) }
+    # Same arithmetic as PaymentsController: payer absorbs the integer remainder.
+    share = amount / (splittees.count + 1)
+    payer.update!(balance: payer.balance + share * splittees.count)
+    splittees.each { |se| se.update!(balance: se.balance - share) }
   end
 end
 

@@ -25,12 +25,15 @@ export default class extends Controller {
       },
       body: JSON.stringify(data),
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then((response) => {
+        if (!response.ok) throw new Error(`Request failed (${response.status})`);
+        return response.json();
+      })
+      .then(() => {
         this.buttonTarget.replaceWith(`✅`);
-        console.log('Success:', data);
       })
       .catch((error) => {
+        this.buttonTarget.replaceWith(`❌`);
         console.error('Error:', error);
       });
   }
