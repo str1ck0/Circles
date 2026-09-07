@@ -10,13 +10,14 @@ class CircleEventsControllerTest < ActionDispatch::IntegrationTest
     @event = create_event(host: @host)
   end
 
-  test "an attendee can attach their own circle, enrolling its members once" do
+  test "an attendee can attach their own circle, enrolling and notifying its members once" do
     sign_in @host
-    assert_difference ["CircleEvent.count", "UserEvent.count"], 1 do
+    assert_difference ["CircleEvent.count", "UserEvent.count", "Notification.count"], 1 do
       post event_circle_events_path(@event), params: { circle_event: { circle_id: @own_circle.id } }
     end
     assert_redirected_to event_path(@event)
     assert @event.attendee?(@friend)
+    assert @friend.notifications.last.event_created?
 
     assert_no_difference ["CircleEvent.count", "UserEvent.count"] do
       post event_circle_events_path(@event), params: { circle_event: { circle_id: @own_circle.id } }

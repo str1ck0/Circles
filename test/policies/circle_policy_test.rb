@@ -23,8 +23,8 @@ class CirclePolicyTest < ActiveSupport::TestCase
     assert_not CirclePolicy.new(@stranger, @private_circle).join?
   end
 
-  test "chat, playlists, adding members and attaching events are members only" do
-    %i[chat? add_playlist? add_member? attach_event? create_event?].each do |action|
+  test "chat, playlists, inviting and attaching events are members only" do
+    %i[chat? add_playlist? invite? attach_event? create_event?].each do |action|
       assert CirclePolicy.new(@member, @public_circle).public_send(action), action
       assert_not CirclePolicy.new(@stranger, @public_circle).public_send(action), action
     end

@@ -60,9 +60,24 @@
     <div class="dashboard-invitations">
       <h5>INVITES</h5>
       <div class="dashboard-invitations-section">
-        <div class="dashboard-invitations-info">
-          <p>No pending invites.</p>
-        </div>
+        <% if @pending_invitations.any? %>
+          <% @pending_invitations.each do |invitation| %>
+            <div class="dashboard-invitations-info">
+              <p><%= invitation.inviter.first_name %> invited you to <strong><%= invitation.circle.name %></strong></p>
+              <div class="dashboard-invitations-info-buttons d-flex">
+                <%= button_to "Accept", accept_invitation_path(invitation), method: :post, class: "btn global-button-circle-show" %>
+                <%= button_to "Decline", decline_invitation_path(invitation), method: :post, class: "btn global-button-circle-show is-muted" %>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="dashboard-invitations-info">
+            <p>No pending invites.</p>
+            <% if @user == current_user %>
+              <%= link_to "Notifications", notifications_path, class: "hover-underline-animation" %>
+            <% end %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 
-// Connects to data-controller="friend"
+// Connects to data-controller="friend" — sends a circle invitation to one user.
 export default class extends Controller {
   static values = {
     circleId: Number,
@@ -14,10 +14,10 @@ export default class extends Controller {
   }
 
   submit() {
-    const data = { user_circle: { user_id: this.userIdValue } };
+    const data = { invitation: { invitee_id: this.userIdValue } };
 
-    fetch(`/circles/${this.circleIdValue}/user_circles`, {
-      method: 'POST', // or 'PUT'
+    fetch(`/circles/${this.circleIdValue}/invitations`, {
+      method: 'POST',
       headers: {
         'X-CSRF-Token': this.csrfToken,
         'Content-Type': 'application/json',
@@ -30,10 +30,10 @@ export default class extends Controller {
         return response.json();
       })
       .then(() => {
-        this.buttonTarget.replaceWith(`✅`);
+        this.buttonTarget.replaceWith('Invited ✓');
       })
       .catch((error) => {
-        this.buttonTarget.replaceWith(`❌`);
+        this.buttonTarget.replaceWith('Could not invite');
         console.error('Error:', error);
       });
   }

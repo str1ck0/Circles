@@ -9,7 +9,7 @@ class CircleEventsController < ApplicationController
 
     CircleEvent.transaction do
       @circle_event.save!
-      @event.enrol_members_of([circle])
+      @event.enrol_members_of([circle], actor: current_user)
     end
     redirect_to event_path(@event), notice: "#{circle.name} added to the event."
   rescue ActiveRecord::RecordInvalid => e

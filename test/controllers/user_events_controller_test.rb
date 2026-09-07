@@ -9,15 +9,16 @@ class UserEventsControllerTest < ActionDispatch::IntegrationTest
     @event = create_event(host: @host, circles: [@circle], private: false)
   end
 
-  test "a circle member can RSVP going to the circle's public event" do
+  test "a circle member can RSVP going to the circle's public event, and the host is told" do
     sign_in @circle_member
-    assert_difference "UserEvent.count", 1 do
+    assert_difference ["UserEvent.count", "Notification.count"], 1 do
       post event_user_events_path(@event), params: { user_event: { status: "going" } }, as: :json
     end
     assert_response :success
     assert_equal "going", response.parsed_body["status"]
     assert_equal 2, response.parsed_body["counts"]["going"]
     assert @event.rsvp_of(@circle_member).going?
+    assert @host.notifications.last.rsvp?
   end
 
   test "changing an RSVP updates the existing row" do

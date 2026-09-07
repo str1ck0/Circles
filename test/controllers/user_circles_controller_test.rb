@@ -5,18 +5,18 @@ class UserCirclesControllerTest < ActionDispatch::IntegrationTest
     @owner = create_user
     @member = create_user
     @stranger = create_user
-    @newcomer = create_user
     @public_circle = create_circle(owner: @owner, members: [@member], private: false)
     @private_circle = create_circle(owner: @owner, members: [@member], private: true)
   end
 
-  test "anyone can join a public circle" do
+  test "anyone can join a public circle, and the owner hears about it" do
     sign_in @stranger
-    assert_difference "UserCircle.count", 1 do
+    assert_difference ["UserCircle.count", "Notification.count"], 1 do
       post circle_user_circles_path(@public_circle)
     end
     assert_redirected_to circle_path(@public_circle)
     assert @public_circle.member?(@stranger)
+    assert @owner.notifications.last.circle_joined?
   end
 
   test "nobody can self-join a private circle" do
@@ -28,28 +28,19 @@ class UserCirclesControllerTest < ActionDispatch::IntegrationTest
     assert_not @private_circle.member?(@stranger)
   end
 
-  test "a member can add someone to a private circle" do
+  test "joining twice is refused" do
     sign_in @member
-    assert_difference "UserCircle.count", 1 do
-      post circle_user_circles_path(@private_circle), params: { user_circle: { user_id: @newcomer.id } }, as: :json
+    assert_no_difference "UserCircle.count" do
+      post circle_user_circles_path(@public_circle), as: :json
     end
-    assert_response :success
-    assert @private_circle.member?(@newcomer)
+    assert_response :forbidden
   end
 
-  test "a non-member cannot add anyone to a circle" do
+  test "the old add-a-user parameter is ignored" do
+    newcomer = create_user
     sign_in @stranger
-    assert_no_difference "UserCircle.count" do
-      post circle_user_circles_path(@private_circle), params: { user_circle: { user_id: @newcomer.id } }, as: :json
-    end
-    assert_response :forbidden
-  end
-
-  test "joining twice is rejected cleanly" do
-    sign_in @member
-    assert_no_difference "UserCircle.count" do
-      post circle_user_circles_path(@public_circle), params: { user_circle: { user_id: @member.id } }, as: :json
-    end
-    assert_response :forbidden
+    post circle_user_circles_path(@public_circle), params: { user_circle: { user_id: newcomer.id } }
+    assert @public_circle.member?(@stranger)
+    assert_not @public_circle.member?(newcomer)
   end
 end
