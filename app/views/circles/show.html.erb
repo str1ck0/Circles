@@ -1,248 +1,206 @@
 <% circle_policy = policy(@circle) %>
-<% if @circle.banner.attached? %>
-  <div class="circle-show-banner">
-    <%= image_tag @circle.banner %>
-    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
-  </div>
-<% else %>
-  <div class="circle-show-banner">
-    <%= image_tag "2560x1440_stars_glare_space_darkness_black.jpeg" %>
-    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
-  </div>
-<% end %>
-<div class="circle-show-title">
-  <%= image_tag @circle.photo, class: "circle-avatar-circle", style: "border-color: #{@circle.border_color}", alt: "circle-avatar" %>
-  <div class="circle-show-details">
-    <h1><%= @circle.name.upcase %></h1>
-    <p class="mb-2"><%= @circle.created_at.strftime("STARTED %b %Y") %></p>
-    <div class="circle-show-details-private">
-      <p><i class="fa-solid fa-user-group"></i><%= @circle.users.size %> MEMBERS</p>
-      <% if @circle.private? %>
-        <p><i class="fa-solid fa-circle"></i>PRIVATE</p>
+<% content_for :title, @circle.name %>
+<div class="circle-page">
+  <header class="circle-hero">
+    <div class="circle-hero-banner">
+      <% if @circle.banner.attached? %>
+        <%= image_tag @circle.banner, alt: "" %>
       <% else %>
-        <p><i class="fa-regular fa-circle"></i>OPEN</p>
+        <%= image_tag "2560x1440_stars_glare_space_darkness_black.jpeg", alt: "" %>
       <% end %>
     </div>
-
-    <% if circle_policy.join? %>
-      <%= button_to "Join circle", circle_user_circles_path(@circle), method: :post, class: "btn global-button-circle-show" %>
-    <% end %>
-
-    <% if circle_policy.invite? %>
-      <!-- Button trigger modal -->
-      <button type="button" class="btn global-button-circle-show" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-        <i class="fa-solid fa-plus"></i>
-        <i class="fa-solid fa-user-group"></i>
-      </button>
-
-      <!-- Modal -->
-      <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div class="modal-content modal-content-circle-show">
-            <div class="modal-header">
-              <i class="fa-regular fa-address-book"></i>
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">Invite friends</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body modal-body-content">
-              <div class="invite-link" data-controller="clipboard">
-                <% if @invite_link %>
-                  <input type="text" readonly value="<%= invite_link_url(@invite_link.token) %>" data-clipboard-target="source" aria-label="Invite link">
-                  <button type="button" class="btn global-button-circle-show" data-clipboard-target="button" data-action="clipboard#copy">Copy link</button>
-                <% else %>
-                  <%= button_to "Create invite link", circle_invitations_path(@circle), method: :post, class: "btn global-button-circle-show", form_class: "invite-link-form" %>
-                  <span class="invite-link-hint">Anyone with the link can join for 7 days.</span>
-                <% end %>
-              </div>
-              <div data-controller="search-users">
-                  <%= form_with url: circle_users_path(@circle), method: :get, html: {class: "mb-4", data: {search_users_target: "form"}} do |f| %>
-                    <%= f.text_field :query,
-                                     class: "form-control",
-                                     placeholder: "Type a user name",
-                                     value: params[:query],
-                                     data: {
-                                      search_users_target: "input",
-                                      action: "keyup->search-users#update"
-                                     }
-                                     %>
-                  <% end %>
-                  <%= render "users_list", users: @invitable_users, circle: @circle %>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <%= link_to "Done!", circle_path(@circle) %>
-            </div>
-          </div>
-        </div>
+    <div class="circle-hero-body">
+      <% if @circle.photo.attached? %>
+        <%= image_tag @circle.photo, class: "ring-avatar ring-avatar-xl circle-hero-avatar", style: "--ring: #{@circle.border_color}", alt: @circle.name %>
+      <% else %>
+        <%= image_tag "avatar/CirclesAvatar.png", class: "ring-avatar ring-avatar-xl circle-hero-avatar", style: "--ring: #{@circle.border_color}", alt: @circle.name %>
+      <% end %>
+      <div class="circle-hero-text">
+        <h1><%= @circle.name %></h1>
+        <p class="circle-hero-meta">
+          <span><i class="fa-solid fa-user-group"></i> <%= pluralize(@members.size, "member") %></span>
+          <span><i class="fa-solid <%= @circle.private? ? 'fa-lock' : 'fa-unlock' %>"></i> <%= @circle.private? ? "Private" : "Open to everyone" %></span>
+          <span>Started <%= @circle.created_at.strftime("%b %Y") %></span>
+        </p>
       </div>
-    <% end %>
-
-    <% if circle_policy.create_event? %>
-      <div class="btn global-button-circle-show">
-        <%= link_to "Create Event", new_event_path  %>
-      </div>
-    <% end %>
-  </div>
-</div>
-
-<div class="circle-show-main-container">
-  <div class="circle-show-main-left">
-    <div class="circle-show-main-top">
-
-      <div class="circle-show-members-container">
-        <div class="circle-show-members-header">
-          <h5>MEMBERS</h5>
-        </div>
-        <div class="circle-show-members-info">
-        <div>
-        </div>
-          <ul style="list-style: none">
-            <% @circle.users.each do |user| %>
-            <li style="font-size: 12px"><%= link_to user_path(user) do %><%= user_avatar user %> <%= user.full_name.upcase %><% end %></li>
-            <% end %>
-          </ul>
-        </div>
-      </div>
-
-      <div class="circle-show-upcoming-events-container">
-        <div class="circle-show-upcoming-events-header">
-          <h5>UPCOMING EVENTS</h5>
-        </div>
-        <div class="circle-show-upcoming-events-cards">
-          <% upcoming = @circle.events.select { |event| event.start_date.future? } %>
-          <% if upcoming.any? %>
-            <% upcoming.each do |event| %>
-              <%= link_to event_path(event) do %>
-                <% if event.photos.attached? %>
-                  <div class="circle-show-event-card">
-                    <div class="title-container">
-                      <p><%= event.title.upcase %></p>
-                    </div>
-                    <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%= url_for(event.photos.first) %>);">
-                      <div class="icons">
-                        <div class="attending">
-                          <i class="fa-solid fa-user-group"></i>
-                          <p><%= event.going_count %></p>
-                        </div>
-                        <% if event.private? %>
-                          <i class="fa-solid fa-circle"> </i>
-                        <% else %>
-                          <i class="fa-regular fa-circle"></i>
-                        <% end %>
-                        <p><%= event.start_date.strftime("%m/%d") %></p>
-                      </div>
-                    </div>
-                  </div>
-                <% else %>
-                  <div class="circle-show-event-card">
-                    <div class="image-icon-container" style="background-image: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url(<%= asset_path('avatar/CirclesAvatar.png') %>)">
-                      <div class="icons">
-                          <i class="fa-solid fa-user-group"></i>
-                        <% if event.private? %>
-                          <i class="fa-solid fa-circle"> </i>
-                        <% else %>
-                          <i class="fa-regular fa-circle"></i>
-                        <% end %>
-                        <p><%= event.start_date.strftime("%m/%d") %></p>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              <% end %>
-            <% end %>
-          <% else %>
-          <p>No upcoming events...</p>
-          <% end %>
-          </div>
-        </div>
-
-    </div>
-    <div class="circle-show-main-bottom">
-      <div class="circle-show-memories-container">
-        <div class="circle-show-memories-header">
-          <h5>MEMORIES</h5>
-        </div>
-        <div class="circle-show-memories-slider-container">
-          <section class="splide my-3" aria-label="Event photos" data-controller="slider">
-            <div class="splide__track">
-              <ul class="splide__list">
-                <% @circle.events.select { |event| event.photos.attached? }.each do |event| %>
-                  <li class="splide__slide"><%= image_tag event.photos.first %></li>
-                <% end %>
-              </ul>
-            </div>
-          </section>
-        </div>
-      </div>
-      <div class="circle-show-spotify-playlists">
-        <div class="spotify-playlists-header">
-          <h5>CIRCLE PLAYLISTS</h5>
-          <% if circle_policy.add_playlist? %>
-            <!-- Playlist Button trigger modal -->
-            <button type="button" class="global-button" id="playlist-button" data-bs-toggle="modal" data-bs-target="#addPlaylist">
-              <h5>+</h5>
-            </button>
-          <% end %>
-        </div>
-        <div class="playlists-grid">
-          <% @circle.circle_playlists.each do |playlist| %>
-            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/<%=playlist.embed_url%>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-          <% end %>
-        </div>
-
-        <% if circle_policy.add_playlist? %>
-          <!-- Modal -->
-          <div class="modal fade" id="addPlaylist" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddPlaylistLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-              <div class="modal-content modal-content-circle-show">
-                <div class="modal-header">
-                  <i class="fa-brands fa-spotify"></i>
-                  <h1 class="modal-title fs-5" id="AddPlaylistLabel">Add a Playlist</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body modal-body-content">
-                  <%= simple_form_for [@circle, @circle_playlist] do |f| %>
-                    <%= f.input :url, label: 'Enter the link to your playlist' %>
-                    <%= f.submit "Add" %>
-                  <% end %>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="circle-hero-actions">
+        <% if circle_policy.join? %>
+          <%= button_to circle_user_circles_path(@circle), method: :post, class: "btn-accent" do %><i class="fa-solid fa-plus"></i> Join circle<% end %>
+        <% end %>
+        <% if circle_policy.invite? %>
+          <button type="button" class="btn-ghost" data-bs-toggle="modal" data-bs-target="#inviteModal"><i class="fa-solid fa-user-plus"></i> Invite friends</button>
+        <% end %>
+        <% if circle_policy.create_event? %>
+          <%= link_to new_event_path, class: "btn-accent" do %><i class="fa-regular fa-calendar-plus"></i> Create event<% end %>
+        <% end %>
+        <% if circle_policy.destroy? %>
+          <%= button_to circle_path(@circle), method: :delete, class: "btn-quiet btn-sm", form: { data: { turbo_confirm: "Delete #{@circle.name}? This can't be undone." } } do %><i class="fa-regular fa-trash-can"></i> Delete<% end %>
         <% end %>
       </div>
     </div>
-  </div>
-  <div class="circle-show-main-right">
-    <div class="circle-show-chatroom-container">
-      <div class="circle-show-chatroom-header">
-        <h5><%= @circle.name.upcase %> CHAT</h5>
-      </div>
-      <% if circle_policy.chat? %>
-        <div class="circle-show-chatroom" data-controller="circle-chatroom-subscription" data-circle-chatroom-subscription-chatroom-id-value="<%= @circle.id %>" data-circle-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
+  </header>
 
-          <div class="messages" data-circle-chatroom-subscription-target="messages">
-            <% @circle.circle_messages.each do |circle_message| %>
-              <div class="message-row d-flex <%= circle_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
-                <div class="<%= circle_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
-                  <%= render "circle_messages/circle_message", circle_message: circle_message %>
-                </div>
-              </div>
+  <div class="circle-layout">
+    <div class="circle-main">
+      <section class="circle-section">
+        <h2 class="section-title">Upcoming events</h2>
+        <% if @upcoming_events.any? %>
+          <div class="cards-event">
+            <% @upcoming_events.each do |event| %>
+              <%= render "shared/event_card", event: event %>
             <% end %>
           </div>
-          <%= simple_form_for [@circle, @circle_message], html: { data: { action: "turbo:submit-end->circle-chatroom-subscription#resetForm" }, class: "d-flex" } do |f| %>
-          <%= f.input :content, label: false, placeholder: "Message #{@circle.name}", wrapper_html: {class: "flex-grow-1"} %>
-          <%= f.submit "Send", class: "global-button-chat mb-3" %>
-          <% end %>
-        </div>
-      <% else %>
-        <div class="circle-show-chatroom">
-          <p class="p-3">Join the circle to see the chat.</p>
-        </div>
+        <% else %>
+          <div class="empty-state">
+            <h3>Nothing planned yet</h3>
+            <% if circle_policy.create_event? %>
+              <p>Be the one who gets everyone together.</p>
+              <%= link_to "Create an event", new_event_path, class: "btn-ghost btn-sm" %>
+            <% else %>
+              <p>Events will show up here once members plan something.</p>
+            <% end %>
+          </div>
+        <% end %>
+      </section>
+
+      <% if @memory_events.any? %>
+        <section class="circle-section">
+          <h2 class="section-title">Memories</h2>
+          <div class="splide memories" aria-label="Photos from this circle's events" data-controller="slider">
+            <div class="splide__track">
+              <ul class="splide__list">
+                <% @memory_events.each do |event| %>
+                  <li class="splide__slide">
+                    <%= link_to event_path(event) do %>
+                      <%= image_tag event.photos.first, alt: event.title %>
+                      <span class="memory-caption"><%= event.title %></span>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </section>
       <% end %>
+
+      <section class="circle-section">
+        <h2 class="section-title">
+          Playlists
+          <% if circle_policy.add_playlist? %>
+            <button type="button" class="section-title-action" data-bs-toggle="modal" data-bs-target="#addPlaylist" title="Add a playlist"><i class="fa-solid fa-plus"></i></button>
+          <% end %>
+        </h2>
+        <% if @circle.circle_playlists.any? %>
+          <div class="playlists-grid">
+            <% @circle.circle_playlists.each do |playlist| %>
+              <iframe title="Spotify playlist" src="https://open.spotify.com/embed/playlist/<%= playlist.embed_url %>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-dim">No playlists yet<%= circle_policy.add_playlist? ? " — add a Spotify link." : "." %></p>
+        <% end %>
+      </section>
     </div>
+
+    <aside class="circle-aside">
+      <div class="chat-panel">
+        <div class="chat-panel-header">
+          <h2>Chat</h2>
+          <span class="text-faint"><%= @circle.name %></span>
+        </div>
+        <% if circle_policy.chat? %>
+          <div class="chat-panel-body" data-controller="circle-chatroom-subscription" data-circle-chatroom-subscription-chatroom-id-value="<%= @circle.id %>" data-circle-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
+            <div class="messages" data-circle-chatroom-subscription-target="messages">
+              <% @circle.circle_messages.includes(:user).each do |circle_message| %>
+                <div class="message-row d-flex <%= circle_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
+                  <div class="<%= circle_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
+                    <%= render "circle_messages/circle_message", circle_message: circle_message %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            <%= simple_form_for [@circle, @circle_message], html: { data: { action: "turbo:submit-end->circle-chatroom-subscription#resetForm" }, class: "chat-form" } do |f| %>
+              <%= f.input :content, label: false, placeholder: "Message #{@circle.name}", wrapper_html: { class: "flex-grow-1 mb-0" }, input_html: { rows: 1, autocomplete: "off" } %>
+              <%= f.button :submit, "Send", class: "btn-accent btn-sm" %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="chat-panel-locked">
+            <i class="fa-solid fa-lock"></i>
+            <p>Join the circle to see the chat.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="members-panel">
+        <div class="chat-panel-header">
+          <h2>Members</h2>
+          <span class="text-faint"><%= @members.size %></span>
+        </div>
+        <ul class="members-list">
+          <% @members.each do |member| %>
+            <li>
+              <%= link_to user_path(member) do %>
+                <%= user_avatar member, class: "ring-avatar ring-avatar-xs" %>
+                <span><%= member.full_name %></span>
+                <% if member == @circle.owner %><span class="member-badge">Owner</span><% end %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </aside>
   </div>
+
+  <% if circle_policy.invite? %>
+    <div class="modal fade" id="inviteModal" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="inviteModalLabel">Invite friends</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="invite-link" data-controller="clipboard">
+              <% if @invite_link %>
+                <input type="text" readonly value="<%= invite_link_url(@invite_link.token) %>" data-clipboard-target="source" aria-label="Invite link">
+                <button type="button" class="btn-ghost btn-sm" data-clipboard-target="button" data-action="clipboard#copy">Copy link</button>
+              <% else %>
+                <%= button_to "Create invite link", circle_invitations_path(@circle), method: :post, class: "btn-ghost btn-sm", form_class: "invite-link-form" %>
+                <span class="invite-link-hint">Anyone with the link can join for 7 days.</span>
+              <% end %>
+            </div>
+            <div data-controller="search-users">
+              <%= form_with url: circle_users_path(@circle), method: :get, html: { class: "mb-3", data: { search_users_target: "form" } } do |f| %>
+                <%= f.text_field :query, class: "form-control", placeholder: "Search people by name", value: params[:query], autocomplete: "off", data: { search_users_target: "input", action: "keyup->search-users#update" } %>
+              <% end %>
+              <%= render "users_list", users: @invitable_users, circle: @circle %>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-ghost btn-sm" data-bs-dismiss="modal">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if circle_policy.add_playlist? %>
+    <div class="modal fade" id="addPlaylist" tabindex="-1" aria-labelledby="addPlaylistLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addPlaylistLabel"><i class="fa-brands fa-spotify"></i> Add a playlist</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <%= simple_form_for [@circle, @circle_playlist] do |f| %>
+              <%= f.input :url, label: "Spotify playlist link", placeholder: "https://open.spotify.com/playlist/…" %>
+              <%= f.button :submit, "Add playlist", class: "btn-accent" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>

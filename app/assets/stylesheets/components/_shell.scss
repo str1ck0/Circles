@@ -201,7 +201,6 @@
 // main column instead. Remove these as each page gets its own revamp PR.
 .app-main {
   .event-main-container,
-  .circle-show-main-container,
   .dashboard-main-container {
     width: auto;
     max-width: var(--content-max);

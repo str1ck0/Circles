@@ -21,6 +21,10 @@ class CirclesController < ApplicationController
   def show
     @circle = Circle.find(params[:id])
     authorize @circle
+    events = @circle.events.includes(:user_events, photos_attachments: :blob).order(:start_date)
+    @upcoming_events = events.select { |event| event.end_date >= Time.current }
+    @memory_events = events.select { |event| event.photos.attached? }
+    @members = @circle.users.includes(photo_attachment: :blob).order(:first_name)
     @circle_message = CircleMessage.new
     @circle_playlist = CirclePlaylist.new
     if policy(@circle).invite?
