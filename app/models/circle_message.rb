@@ -1,8 +1,5 @@
 class CircleMessage < ApplicationRecord
-  belongs_to :user
-  belongs_to :circle
+  include ChatMessage
 
-  def sender?(a_user)
-    user.id == a_user.id
-  end
+  belongs_to :circle
 end

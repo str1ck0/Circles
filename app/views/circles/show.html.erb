@@ -109,17 +109,17 @@
           <span class="text-faint"><%= @circle.name %></span>
         </div>
         <% if circle_policy.chat? %>
-          <div class="chat-panel-body" data-controller="circle-chatroom-subscription" data-circle-chatroom-subscription-chatroom-id-value="<%= @circle.id %>" data-circle-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
-            <div class="messages" data-circle-chatroom-subscription-target="messages">
+          <div class="chat-panel-body" data-controller="chatroom-subscription" data-chatroom-subscription-channel-value="CircleChatroomChannel" data-chatroom-subscription-id-value="<%= @circle.id %>" data-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
+            <div class="messages" data-chatroom-subscription-target="messages">
               <% @circle.circle_messages.includes(:user).each do |circle_message| %>
                 <div class="message-row d-flex <%= circle_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
                   <div class="<%= circle_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
-                    <%= render "circle_messages/circle_message", circle_message: circle_message %>
+                    <%= render "shared/chat_message", message: circle_message %>
                   </div>
                 </div>
               <% end %>
             </div>
-            <%= simple_form_for [@circle, @circle_message], html: { data: { action: "turbo:submit-end->circle-chatroom-subscription#resetForm" }, class: "chat-form" } do |f| %>
+            <%= simple_form_for [@circle, @circle_message], html: { data: { action: "turbo:submit-end->chatroom-subscription#resetForm" }, class: "chat-form" } do |f| %>
               <%= f.input :content, label: false, placeholder: "Message #{@circle.name}", wrapper_html: { class: "flex-grow-1 mb-0" }, input_html: { rows: 1, autocomplete: "off" } %>
               <%= f.button :submit, "Send", class: "btn-accent btn-sm" %>
             <% end %>

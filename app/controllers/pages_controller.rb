@@ -4,7 +4,7 @@ class PagesController < ApplicationController
 
   def home
     visible = policy_scope(Event).includes(:user_events, photos_attachments: :blob)
-    @events = visible.where("end_date >= ?", Time.current).order(:start_date)
+    @events = visible.where("end_date >= ?", Time.current).order(:start_date).limit(30)
     @past_events = visible.where("end_date < ?", Time.current).order(start_date: :desc).limit(8)
 
     if user_signed_in?

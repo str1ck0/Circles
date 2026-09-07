@@ -4,26 +4,20 @@
 
 import { application } from "./application"
 
+import ChatroomSubscriptionController from "./chatroom_subscription_controller"
+application.register("chatroom-subscription", ChatroomSubscriptionController)
+
 import ClipboardController from "./clipboard_controller"
 application.register("clipboard", ClipboardController)
 
-import CircleChatroomSubscriptionController from "./circle_chatroom_subscription_controller"
-application.register("circle-chatroom-subscription", CircleChatroomSubscriptionController)
-
 import CursorlightController from "./cursorlight_controller"
 application.register("cursorlight", CursorlightController)
-
-import EventChatroomSubscriptionController from "./event_chatroom_subscription_controller"
-application.register("event-chatroom-subscription", EventChatroomSubscriptionController)
 
 import FlatpickerController from "./flatpicker_controller"
 application.register("flatpicker", FlatpickerController)
 
 import FriendController from "./friend_controller"
 application.register("friend", FriendController)
-
-import GradientController from "./gradient_controller"
-application.register("gradient", GradientController)
 
 import MapController from "./map_controller"
 application.register("map", MapController)

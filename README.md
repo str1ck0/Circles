@@ -2,116 +2,81 @@
 
 # ◎ Circles
 
-**Plan events with the people who matter — in circles.**
+**Your people, in orbit.**
 
-Circles is a social event-planning web app. You form **circles** with your
-friends, create **events** inside them, chat in real time, split the bill, share
-Spotify playlists, and see everything on a map.
+Private circles for your crew, open clubs for everyone else. Plan events, chat live,
+split the bill — without the group-chat chaos.
 
-<!-- Replace with your live URL once deployed -->
-🔗 **[Live demo](https://circles.onrender.com)** &nbsp;·&nbsp; Log in with `benten@gmail.com` / `password`
+🔗 **[Live demo](https://circles-rpke.onrender.com)** &nbsp;·&nbsp; log in with `benten@gmail.com` / `password`
 
 ![Ruby](https://img.shields.io/badge/Ruby-3.1.2-CC342D?logo=ruby&logoColor=white)
 ![Rails](https://img.shields.io/badge/Rails-7.0-D30001?logo=rubyonrails&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![Hotwire](https://img.shields.io/badge/Hotwire-Turbo%20%2B%20Stimulus-5cb85c)
+![Tests](https://img.shields.io/badge/tests-minitest-informational)
 
 </div>
 
+> The demo runs on Render's free tier, so the first load after a quiet spell takes
+> ~30 seconds while the dyno wakes up.
+
 ---
 
-## Features
+## What it does
 
 | | |
 |---|---|
-| 👥 **Circles** | Create private groups of friends, each with its own banner, colour and members. |
-| 📅 **Events** | Plan events inside a circle — with dates, a location, a photo gallery and attendees. |
-| 💬 **Real-time chat** | Live group chat in every circle and event, powered by Action Cable (WebSockets). |
-| 🗺️ **Maps** | Event locations are geocoded and shown on an interactive Mapbox map. |
-| 💸 **Bill splitting** | "Splitty" tracks who paid what and settles balances across attendees. |
-| 🎧 **Playlists** | Embed Spotify playlists on any circle or event. |
-| 🖼️ **Memories** | Photo carousels for each event. |
-| 🔐 **Auth** | Email/password accounts via Devise. |
+| 👥 **Circles** | Open clubs anyone can join, or private circles that are invite-only. Each has a photo, banner and its own ring colour. |
+| ✉️ **Invitations** | Members invite people in-app (with a notification to accept or decline) or share a 7-day invite link. |
+| 📅 **Events** | Plan events for one or more circles — everyone in those circles lands on the guest list. Dates, location, photos. |
+| ✅ **RSVPs** | Going / Maybe / Can't go, with live counts and a guest list grouped by answer. |
+| 💬 **Real-time chat** | A chat room in every circle and event over Action Cable — members only. |
+| 🔔 **Notifications** | Invites, new events, RSVPs on your events, people joining your circle. Unread badge in the sidebar. |
+| 🗺️ **Maps** | Locations are geocoded and shown on a Mapbox map. |
+| 💸 **Splitty** | Bill splitting that keeps every balance honest — the payer absorbs the rounding, so the books always sum to zero. |
+| 🎧 **Playlists** | Spotify embeds on circles and events. |
+| 🪪 **Profiles** | Public profiles with bio and handle, and a people directory with search. |
 
-<!--
-## Screenshots
-Drop images into docs/screenshots/ and they'll render here:
+## How it's built
 
-![Home](docs/screenshots/home.png)
-![Circle with live chat](docs/screenshots/circle.png)
-![Event with map and bill-splitting](docs/screenshots/event.png)
--->
+**Rails 7.0 · Ruby 3.1.2 · PostgreSQL · Hotwire (Turbo + Stimulus) · Bootstrap 5 + SCSS · Action Cable over Redis · Devise · Pundit**
 
-## Tech stack
+- **Authorization is the spine.** `CirclePolicy` and `EventPolicy` hold every rule; join-table
+  controllers authorize against the parent, and `verify_authorized` runs after every action so
+  nothing ships unguarded. Chat channels reject anyone the policy wouldn't let in.
+- **Circles and events mirror each other** (messages, channels, playlists), so the shared
+  behaviour lives in concerns and base classes: `ChatMessage`, `SpotifyEmbed`,
+  `ChatroomChannel`, `ChatMessagesController`, `PlaylistsController`, and one
+  `chatroom-subscription` Stimulus controller for both.
+- **Design system**: tokens in `app/assets/stylesheets/config/`, a persistent sidebar shell that
+  collapses to a top bar on small screens, Josefin Sans + Work Sans, and the ring/orbit motif
+  carried through avatars and the landing page.
+- **Services**: Cloudinary (images), Mapbox + `geocoder` (maps), Redis (cable pub/sub).
 
-- **Backend:** Ruby 3.1.2, Ruby on Rails 7.0, PostgreSQL
-- **Front-end:** Hotwire (Turbo + Stimulus), Bootstrap 5, SCSS, bundled with Webpack (`jsbundling-rails`)
-- **Real-time:** Action Cable over Redis
-- **Services:** Cloudinary (image storage), Mapbox + `geocoder` (maps & geocoding)
-- **Auth:** Devise
-
-## Architecture at a glance
-
-Users join **Circles** (via `UserCircle`), which contain **Events** (via `CircleEvent`).
-Users attend events (via `UserEvent`). Chat lives in `CircleMessage` / `EventMessage`
-and is broadcast over dedicated Action Cable channels. `Payment` and `Splittee`
-model the bill-splitting; `CirclePlaylist` / `EventPlaylist` hold Spotify embeds.
-
-## Getting started
-
-### Prerequisites
-
-- Ruby 3.1.2
-- PostgreSQL
-- Redis (for Action Cable)
-- Node.js + Yarn
-
-### Setup
+## Running it locally
 
 ```bash
-# 1. Install dependencies
-bundle install
-yarn install
-
-# 2. Configure environment variables
-cp .env.example .env
-#   then fill in CLOUDINARY_URL and MAPBOX_API_KEY (see .env.example)
-
-# 3. Set up the database
-bin/rails db:create db:migrate db:seed
-
-# 4. Run the app (starts Rails + the JS build watcher)
-bin/dev
+bin/setup                     # bundle, yarn, database
+cp .env.example .env          # add CLOUDINARY_URL and MAPBOX_API_KEY (both optional locally)
+bin/rails db:seed             # demo data: 61 users, 8 circles, 8 events, chat history
+bin/dev                       # Rails on :3000 + the JS build watcher
 ```
 
-Visit <http://localhost:3000> and log in with the seeded account:
-**`benten@gmail.com` / `password`**.
+Log in with **`benten@gmail.com` / `password`** — every seeded user shares that password.
+Chat works locally with no Redis (the `async` adapter); production needs `REDIS_URL`.
 
-### Environment variables
-
-| Variable | Purpose |
-|---|---|
-| `CLOUDINARY_URL` | Image hosting — `cloudinary://<key>:<secret>@<cloud_name>` |
-| `MAPBOX_API_KEY` | Maps & geocoding on event pages |
+```bash
+bin/rails test                # policy, controller, channel and model tests
+```
 
 ## Deployment
 
-Circles runs on a **fully free** stack:
-
-- **Web:** [Render](https://render.com) (free web service) — see `render.yaml`
-- **Database:** [Neon](https://neon.tech) (free Postgres) → `DATABASE_URL`
-- **Redis:** [Upstash](https://upstash.com) (free) → `REDIS_URL` (required for chat)
-- **Images:** [Cloudinary](https://cloudinary.com) (free) → `CLOUDINARY_URL`
-
-The `render.yaml` blueprint and `bin/render-build.sh` build script handle install,
-asset compilation, migration and first-run seeding automatically.
-
-## Tests
-
-```bash
-bin/rails test
-```
+Free-tier stack, no card required: **Render** (web, `render.yaml`), **Neon** (Postgres),
+**Upstash** (Redis), **Cloudinary**, **Mapbox**. `bin/render-build.sh` installs, precompiles,
+migrates and seeds on first boot only. Set `APP_HOST` to the assigned hostname — it feeds
+Action Cable's allowed origins, and chat silently fails without it.
 
 ## Credits
 
-Originally built as a group project at [Le Wagon](https://www.lewagon.com).
+Started as a one-week group project at [Le Wagon](https://www.lewagon.com) and rebuilt
+afterwards into what's here.
