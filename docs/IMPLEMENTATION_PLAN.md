@@ -1,6 +1,6 @@
 # Circles — Implementation Plan
 
-Working document for the portfolio push. Updated 2026-08-11.
+Working document for the portfolio push. Updated 2026-09-07.
 
 **Goal:** get Circles hosted publicly, free and without a credit card, as a portfolio piece
 demonstrating a full-stack Rails app with real-time features.
@@ -19,7 +19,6 @@ replace Devise. The app works; this is a polish-and-ship effort.
 | Bug-fix pass ("redux") | ✅ Shipped in `5031cb7` |
 | Seeds + README | ✅ Done |
 | Sidebar logout fix | ✅ PR [#1](https://github.com/str1ck0/Circles/pull/1) — merged |
-| Screenshots | ❌ Not captured |
 | Deploy | ⛔ Blocked on account creation (user-only step) |
 | Test coverage | ⚠️ Thin; 1 pre-existing failure |
 | Cloudinary secret rotation | ⚠️ Outstanding |
@@ -31,26 +30,6 @@ replace Devise. The app works; this is a polish-and-ship effort.
 PR #1 (`fix/home-logout-link-signed-in-only`) wrapped the home sidebar's Logout link in a
 `user_signed_in?` check — signed-out visitors had been seeing Login and Logout
 simultaneously. Verified in both auth states. Merged as `0995008`.
-
----
-
-## Phase 1 — Screenshots
-
-Blocking the README, which has a commented-out screenshot block ready to uncomment.
-
-Run `bin/dev`, sign in as `benten@gmail.com` / `password`, and capture into
-`docs/screenshots/`:
-
-1. **Landing feed, signed out** — the event card grid. This is the money shot; the sidebar
-   is clean as of PR #1.
-2. **Circle page with live chat** — ideally mid-conversation so the message list has content.
-3. **Event page with the Mapbox map** — proves the geocoding integration.
-4. **Bill-splitting view** — the feature least common in student projects, worth showing.
-
-Then uncomment the README block and check the relative paths resolve on GitHub.
-
-**Why these four:** they cover the features that differentiate the app. Auth screens, forms
-and index pages read as generic and are worth skipping.
 
 ---
 
