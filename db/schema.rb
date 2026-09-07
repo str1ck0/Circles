@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_09_07_182305) do
+ActiveRecord::Schema[7.0].define(version: 2026_09_07_183120) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -113,6 +113,38 @@ ActiveRecord::Schema[7.0].define(version: 2026_09_07_182305) do
     t.index ["user_id"], name: "index_events_on_user_id"
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "circle_id", null: false
+    t.bigint "inviter_id", null: false
+    t.bigint "invitee_id"
+    t.string "token", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "expires_at"
+    t.datetime "accepted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["circle_id", "invitee_id", "status"], name: "index_invitations_on_circle_id_and_invitee_id_and_status"
+    t.index ["circle_id"], name: "index_invitations_on_circle_id"
+    t.index ["invitee_id"], name: "index_invitations_on_invitee_id"
+    t.index ["inviter_id"], name: "index_invitations_on_inviter_id"
+    t.index ["token"], name: "index_invitations_on_token", unique: true
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "recipient_id", null: false
+    t.bigint "actor_id"
+    t.string "notifiable_type", null: false
+    t.bigint "notifiable_id", null: false
+    t.integer "kind", null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["recipient_id", "read_at"], name: "index_notifications_on_recipient_id_and_read_at"
+    t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
+  end
+
   create_table "payments", force: :cascade do |t|
     t.integer "amount"
     t.string "description"
@@ -180,6 +212,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_09_07_182305) do
   add_foreign_key "event_messages", "users"
   add_foreign_key "event_playlists", "events"
   add_foreign_key "events", "users"
+  add_foreign_key "invitations", "circles"
+  add_foreign_key "invitations", "users", column: "invitee_id"
+  add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "notifications", "users", column: "actor_id"
+  add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "payments", "user_events"
   add_foreign_key "splittees", "payments"
   add_foreign_key "splittees", "user_events"

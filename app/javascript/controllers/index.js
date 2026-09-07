@@ -4,6 +4,9 @@
 
 import { application } from "./application"
 
+import ClipboardController from "./clipboard_controller"
+application.register("clipboard", ClipboardController)
+
 import CircleChatroomSubscriptionController from "./circle_chatroom_subscription_controller"
 application.register("circle-chatroom-subscription", CircleChatroomSubscriptionController)
 

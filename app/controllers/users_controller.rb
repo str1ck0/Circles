@@ -6,8 +6,8 @@ class UsersController < ApplicationController
 
   def index
     @circle = Circle.find(params[:circle_id])
-    authorize @circle, :add_member?
-    @users = User.where.not(id: @circle.users.select(:id))
+    authorize @circle, :invite?
+    @users = @circle.invitable_users
 
     if params[:query].present?
       @users = @users.where("first_name ILIKE :q OR last_name ILIKE :q", q: "%#{params[:query]}%")

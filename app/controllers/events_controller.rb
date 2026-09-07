@@ -11,7 +11,7 @@ class EventsController < ApplicationController
     authorize @event
     if @event.save
       @event.user_events.create!(user: current_user, status: :going)
-      @event.enrol_members_of(@event.circles)
+      @event.enrol_members_of(@event.circles, actor: current_user)
       redirect_to event_path(@event), notice: "Event created!"
     else
       render :new, status: :unprocessable_entity

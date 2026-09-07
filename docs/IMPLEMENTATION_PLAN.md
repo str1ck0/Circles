@@ -18,8 +18,8 @@ without rebuilding the stack.
 | Deploy | ✅ **Live at https://circles-rpke.onrender.com** (Render + Neon + Upstash) |
 | Audit | ✅ [Findings report](https://claude.ai/code/artifact/65ee6d6f-ba2f-483d-94df-a0d33c79dfed) — 9 critical, 3 high, 1 medium, 3 low |
 | Phase 1 — Authorization foundation | ✅ PR [#3](https://github.com/str1ck0/Circles/pull/3) — merged, live |
-| Phase 2 — RSVP states | 🔄 In progress (`feat/rsvp-states`) |
-| Phase 3 — Invitations + notifications | ⬜ |
+| Phase 2 — RSVP states | ✅ PR [#4](https://github.com/str1ck0/Circles/pull/4) — merged |
+| Phase 3 — Invitations + notifications | 🔄 In progress (`feat/invitations-notifications`) |
 | Phase 4 — Profiles + user search | ⬜ |
 | Phase 5 — UI revamp | ⬜ |
 | Phase 6 — Concern extraction + cleanup | ⬜ |
@@ -81,16 +81,21 @@ Being on the guest list in any state (including declined) still counts as an att
 for chat/playlists/payments — the guest list *is* the access list. Only `going` guests
 are offered as payers/splittees.
 
-## Phase 3 — Invitations + notifications
+## Phase 3 — Invitations + notifications 🔄
 
 Coupled because an invite *is* a notification.
 
-- `Invitation` (circle, inviter, invitee nullable, token, expires_at, accepted_at).
-  In-app: member searches users → invitation → invitee accepts. Link: `/invites/:token`,
-  accepted by whoever is signed in. Replaces the direct "add member" from Phase 1.
-- `Notification` (recipient, actor, notifiable polymorphic, kind, read_at). Created for:
-  invited to a circle, new event in your circle, RSVP on your event. Unread badge in the
-  sidebar, notifications page, mark-read on view.
+- `Invitation` (circle, inviter, invitee nullable, token, status, expires_at,
+  accepted_at). Personal invites are one-shot and land in the invitee's notifications with
+  Accept/Decline. Link invites (`invitee` nil) live at `/invites/:token`, stay open for 7
+  days, and can be redeemed by anyone signed in. Replaced the direct "add member" —
+  `UserCirclesController` is self-join only now.
+- `Notification` (recipient, actor, notifiable polymorphic, kind, read_at) with kinds
+  `circle_invitation`, `invitation_accepted`, `event_created`, `rsvp`, `circle_joined`.
+  Always created through `Notification.notify`, which skips self-notifications. Every
+  notifiable declares `has_many :notifications, as: :notifiable, dependent: :destroy`.
+  Unread badge in the home sidebar, `/notifications` marks everything read on view,
+  clicking one marks it read and redirects to its subject.
 
 ## Phase 4 — Profiles + user search
 

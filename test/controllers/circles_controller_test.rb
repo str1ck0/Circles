@@ -16,11 +16,13 @@ class CirclesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "You don't have access to that.", flash[:alert]
   end
 
-  test "a member can view a private circle with the chat" do
+  test "a member can view a private circle with the chat and invite controls" do
     sign_in @member
     get circle_path(@private_circle)
     assert_response :success
     assert_includes response.body, "circle-chatroom-subscription"
+    assert_includes response.body, "Invite friends"
+    assert_includes response.body, "Create invite link"
   end
 
   test "a stranger can view a public circle but not its chat or add-member controls" do
@@ -29,7 +31,7 @@ class CirclesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Join circle"
     assert_not_includes response.body, "circle-chatroom-subscription"
-    assert_not_includes response.body, "Add friends"
+    assert_not_includes response.body, "Invite friends"
   end
 
   test "only the owner can destroy" do

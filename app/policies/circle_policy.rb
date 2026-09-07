@@ -12,7 +12,7 @@ class CirclePolicy < ApplicationPolicy
   def create?        = user.present?
   def destroy?       = owner?
   def join?          = user.present? && record.public? && !member?
-  def add_member?    = member?
+  def invite?        = member?
   def chat?          = member?
   def add_playlist?  = member?
   def create_event?  = member?

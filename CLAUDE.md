@@ -66,6 +66,14 @@ unless private, to members of its attached circles. "Attendee" means *any* row o
 `user_events` regardless of its RSVP `status` (`invited`/`going`/`maybe`/`declined`) —
 the guest list is the access list.
 
+**Invitations and notifications.** Joining a private circle happens through an
+`Invitation` — personal (one-shot, accept/decline from `/notifications`) or link
+(`/invites/:token`, open for 7 days, reusable). `UserCirclesController` is self-join for
+public circles only. Notifications are only ever created via `Notification.notify(...)`,
+which drops self-notifications; anything that can be a `notifiable` must declare
+`has_many :notifications, as: :notifiable, dependent: :destroy` or the polymorphic
+`belongs_to` dangles after the subject is deleted.
+
 **Bill splitting lives on the join table, not the user.** `balance` is a column on
 `user_events`, so it is per-event, not a global wallet. The split arithmetic is in
 `PaymentsController#create`, wrapped in a transaction; the payer absorbs the integer

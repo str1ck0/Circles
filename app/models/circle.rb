@@ -5,6 +5,7 @@ class Circle < ApplicationRecord
   has_many :user_circles, dependent: :destroy
   has_many :users, through: :user_circles
   has_many :circle_messages, dependent: :destroy
+  has_many :invitations, dependent: :destroy
   has_one_attached :photo
   has_one_attached :banner
   has_many :circle_playlists, dependent: :destroy
@@ -22,5 +23,11 @@ class Circle < ApplicationRecord
 
   def member?(user)
     user.present? && user_circles.exists?(user_id: user.id)
+  end
+
+  # People who could still be invited: not members, no open personal invite.
+  def invitable_users
+    User.where.not(id: user_circles.select(:user_id))
+        .where.not(id: invitations.active.personal.select(:invitee_id))
   end
 end

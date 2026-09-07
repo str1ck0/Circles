@@ -31,6 +31,8 @@ end
 # ---------------------------------------------------------------------------
 
 puts "> Clearing the DB.."
+Notification.destroy_all
+Invitation.destroy_all
 Splittee.destroy_all
 Payment.destroy_all
 EventPlaylist.destroy_all
@@ -104,16 +106,27 @@ circle_data = [
     banner: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80" }
 ]
 
-circles = circle_data.map do |data|
+others = users - [main_user]
+
+circles = circle_data.each_with_index.map do |data, i|
+  # The main user is a member of most circles, but gets a pending invite to the last two
+  # so the invitations/notifications flow has something to show.
+  invite_only = i >= circle_data.size - 2
+  members = others.sample(data[:members])
+  members.unshift(main_user) unless invite_only
+
   circle = Circle.new(name: data[:name], private: data[:private],
-                      border_color: COLORS.sample, owner: main_user)
+                      border_color: COLORS.sample, owner: members.first)
   attach_image(circle, :photo, data[:photo])
   attach_image(circle, :banner, data[:banner])
   circle.save!
 
-  # Main user is always a member; fill the rest with random distinct users.
-  members = ([main_user] + users.sample(data[:members])).uniq.first(data[:members] + 1)
   members.each { |user| UserCircle.find_or_create_by!(user: user, circle: circle) }
+
+  if invite_only
+    invitation = Invitation.create!(circle: circle, inviter: members.first, invitee: main_user)
+    Notification.notify(recipient: main_user, actor: members.first, notifiable: invitation, kind: :circle_invitation)
+  end
   print "."
   circle
 end
@@ -167,6 +180,9 @@ events = event_data.each_with_index.map do |data, i|
   UserEvent.create!(user: event.user, event: event, status: :going)
   circle.users.where.not(id: event.user_id).each do |user|
     UserEvent.create!(user: user, event: event, status: %i[going going going maybe invited declined].sample)
+  end
+  if event.attendee?(main_user)
+    Notification.notify(recipient: main_user, actor: event.user, notifiable: event, kind: :event_created)
   end
   print "."
   event

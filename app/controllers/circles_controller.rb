@@ -23,7 +23,10 @@ class CirclesController < ApplicationController
     authorize @circle
     @circle_message = CircleMessage.new
     @circle_playlist = CirclePlaylist.new
-    @invitable_users = User.where.not(id: @circle.users.select(:id)) if policy(@circle).add_member?
+    if policy(@circle).invite?
+      @invitable_users = @circle.invitable_users
+      @invite_link = @circle.invitations.links.active.first
+    end
   end
 
   def destroy

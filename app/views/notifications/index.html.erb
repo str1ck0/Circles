@@ -1,0 +1,37 @@
+<div class="notifications-page">
+  <div class="notifications-header">
+    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
+    <h2>NOTIFICATIONS</h2>
+  </div>
+
+  <% if @pending_invitations.any? %>
+    <h5 class="notifications-section-title">INVITES</h5>
+    <% @pending_invitations.each do |invitation| %>
+      <div class="invitation-card">
+        <%= user_avatar invitation.inviter %>
+        <p><strong><%= invitation.inviter.full_name %></strong> invited you to join <strong><%= invitation.circle.name %></strong></p>
+        <div class="invitation-actions">
+          <%= button_to "Accept", accept_invitation_path(invitation), method: :post, class: "btn global-button-circle-show" %>
+          <%= button_to "Decline", decline_invitation_path(invitation), method: :post, class: "btn global-button-circle-show is-muted" %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <h5 class="notifications-section-title">ACTIVITY</h5>
+  <% if @notifications.empty? %>
+    <p class="notifications-empty">Nothing yet. Join a circle or RSVP to an event and it'll show up here.</p>
+  <% else %>
+    <% @notifications.each do |notification| %>
+      <%= link_to notification_path(notification), class: "notification #{'is-unread' unless notification.read?}" do %>
+        <% if notification.actor %>
+          <%= user_avatar notification.actor %>
+        <% else %>
+          <span class="notification-icon"><i class="fa-regular fa-bell"></i></span>
+        <% end %>
+        <p><%= notification_text(notification) %></p>
+        <span class="when"><%= time_ago_in_words(notification.created_at) %> ago</span>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

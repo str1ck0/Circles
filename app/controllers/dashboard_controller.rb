@@ -9,6 +9,7 @@ class DashboardController < ApplicationController
     @circle = @circles.first
     @circle_playlist = CirclePlaylist.new
     @discover_events = policy_scope(Event).includes(photos_attachments: :blob).limit(12)
+    @pending_invitations = @user == current_user ? current_user.received_invitations.active.includes(:circle, :inviter) : []
     @orbit_users = User.where(id: UserCircle.where(circle_id: @circles.select(:id)).select(:user_id))
                        .where.not(id: @user.id).limit(3)
   end

@@ -28,7 +28,7 @@
       <%= button_to "Join circle", circle_user_circles_path(@circle), method: :post, class: "btn global-button-circle-show" %>
     <% end %>
 
-    <% if circle_policy.add_member? %>
+    <% if circle_policy.invite? %>
       <!-- Button trigger modal -->
       <button type="button" class="btn global-button-circle-show" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
         <i class="fa-solid fa-plus"></i>
@@ -41,10 +41,19 @@
           <div class="modal-content modal-content-circle-show">
             <div class="modal-header">
               <i class="fa-regular fa-address-book"></i>
-              <h1 class="modal-title fs-5" id="staticBackdropLabel">Add friends</h1>
+              <h1 class="modal-title fs-5" id="staticBackdropLabel">Invite friends</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body modal-body-content">
+              <div class="invite-link" data-controller="clipboard">
+                <% if @invite_link %>
+                  <input type="text" readonly value="<%= invite_link_url(@invite_link.token) %>" data-clipboard-target="source" aria-label="Invite link">
+                  <button type="button" class="btn global-button-circle-show" data-clipboard-target="button" data-action="clipboard#copy">Copy link</button>
+                <% else %>
+                  <%= button_to "Create invite link", circle_invitations_path(@circle), method: :post, class: "btn global-button-circle-show", form_class: "invite-link-form" %>
+                  <span class="invite-link-hint">Anyone with the link can join for 7 days.</span>
+                <% end %>
+              </div>
               <div data-controller="search-users">
                   <%= form_with url: circle_users_path(@circle), method: :get, html: {class: "mb-4", data: {search_users_target: "form"}} do |f| %>
                     <%= f.text_field :query,

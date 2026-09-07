@@ -18,6 +18,9 @@ class UserEventsController < ApplicationController
     @user_event.status = status
 
     if @user_event.save
+      if @user_event.going? && @user_event.saved_change_to_status?
+        Notification.notify(recipient: @event.user, actor: current_user, notifiable: @user_event, kind: :rsvp)
+      end
       respond_to do |format|
         format.html { redirect_to @event, notice: NOTICES[status] }
         format.json { render json: { status: status, label: NOTICES[status], counts: @event.rsvp_counts } }
