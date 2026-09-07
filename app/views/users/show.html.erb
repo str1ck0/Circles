@@ -1,7 +1,7 @@
-<div class="profile-page">
+<% content_for :title, @user.full_name %>
+<div class="page">
   <div class="profile-header">
-    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path, class: "profile-back" %>
-    <%= user_avatar @user, class: "profile-avatar" %>
+    <%= user_avatar @user, class: "ring-avatar ring-avatar-xl" %>
     <div class="profile-identity">
       <h1><%= @user.full_name %></h1>
       <% if @user.handle %>
@@ -11,34 +11,34 @@
       <% if @user.bio.present? %>
         <p class="profile-bio"><%= @user.bio %></p>
       <% end %>
-      <div class="profile-actions">
-        <% if @user == current_user %>
-          <%= link_to "Edit profile", edit_user_registration_path, class: "btn global-button-circle-show" %>
-          <%= link_to "Dashboard", dashboard_path(current_user), class: "btn global-button-circle-show is-muted" %>
-        <% end %>
-      </div>
+      <% if @user == current_user %>
+        <div class="profile-actions">
+          <%= link_to edit_user_registration_path, class: "btn-accent btn-sm" do %><i class="fa-solid fa-pen"></i> Edit profile<% end %>
+          <%= link_to dashboard_path(current_user), class: "btn-ghost btn-sm" do %><i class="fa-solid fa-gauge-high"></i> Dashboard<% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 
-  <section class="profile-section">
-    <h5><%= @user == current_user ? "YOUR CIRCLES" : "CIRCLES" %></h5>
+  <section class="feed-section">
+    <h2 class="section-title"><%= @user == current_user ? "YOUR CIRCLES" : "CIRCLES" %></h2>
     <% if @circles.any? %>
-      <div class="circle-grid profile-circle-grid">
+      <div class="circle-cards">
         <% @circles.each do |circle| %>
-          <%= render "shared/circle_avatar", circle: circle %>
+          <%= render "shared/circle_card", circle: circle %>
         <% end %>
       </div>
     <% else %>
-      <p class="profile-empty"><%= @user == current_user ? "You haven't joined a circle yet." : "No circles you can see." %></p>
+      <p class="text-dim"><%= @user == current_user ? "You haven't joined a circle yet." : "No circles you can see." %></p>
     <% end %>
   </section>
 
-  <section class="profile-section">
-    <h5>UPCOMING EVENTS</h5>
+  <section class="feed-section">
+    <h2 class="section-title">Upcoming events</h2>
     <% if @events.any? %>
       <%= render "shared/home-card" %>
     <% else %>
-      <p class="profile-empty">Nothing coming up.</p>
+      <p class="text-dim">Nothing coming up.</p>
     <% end %>
   </section>
 </div>

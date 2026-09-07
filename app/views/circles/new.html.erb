@@ -1,14 +1,37 @@
-<div class="container-form">
-  <h2>CREATE A NEW CIRCLE</h2>
-  <%= simple_form_for @circle do |f| %>
-    <%= f.input :name %>
-    <%= f.input :photo, as: :file %>
-    <%= f.input :private, as: :radio_buttons, collection: [['Private — invite only', true], ['Public — anyone can join', false]], required: true %>
-    <%= f.input :banner, as: :file %>
-    <%= f.input :border_color, as: :radio_buttons, collection_wrapper_tag: "div", collection_wrapper_class: "color-select-wrapper",
-                label: "Choose a color for your circle" , collection: @colors, item_wrapper_class: "circle-color-input",
-                input_html: { class: 'multiselectuser', value: ""}%>
-    <%= f.association :users, label: "Who do you want to add to your circle?", collection: User.where.not(id: current_user.id), label_method: :full_name, input_html: { class: 'multiselectuser'} %>
-    <%= f.submit %>
-  <% end %>
+<% content_for :title, "New circle" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">New circle</p>
+      <h1>Start a circle</h1>
+    </div>
+  </header>
+
+  <div class="container-form container-form-page">
+    <%= simple_form_for @circle do |f| %>
+      <%= f.error_notification %>
+
+      <%= f.input :name, placeholder: "The Sunday crew", autofocus: true %>
+
+      <div class="row g-2">
+        <div class="col-sm-6"><%= f.input :photo, as: :file, label: "Circle photo", input_html: { accept: "image/*" } %></div>
+        <div class="col-sm-6"><%= f.input :banner, as: :file, label: "Banner", input_html: { accept: "image/*" } %></div>
+      </div>
+
+      <%= f.input :border_color, as: :radio_buttons, label: "Ring colour", collection: @colors,
+                  collection_wrapper_tag: "div", collection_wrapper_class: "color-select-wrapper",
+                  item_wrapper_class: "circle-color-input", checked: @colors.first %>
+
+      <%= f.input :private, as: :radio_buttons, label: "Who can join?", collection: [["Anyone — an open club", false], ["Invite only", true]], checked: true, item_wrapper_class: "form-check", hint: "Open circles show up on everyone's home page." %>
+
+      <%= f.association :users, label: "Add people now (optional)", collection: User.where.not(id: current_user.id).order(:first_name), label_method: :full_name,
+                        input_html: { multiple: true, data: { controller: "tom-select" }, placeholder: "Start typing a name" },
+                        hint: "You can also invite people or share a link once the circle exists." %>
+
+      <div class="form-actions">
+        <%= f.button :submit, "Create circle", class: "btn-accent" %>
+        <%= link_to "Cancel", root_path, class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </div>
 </div>

@@ -21,7 +21,7 @@ without rebuilding the stack.
 | Phase 2 — RSVP states | ✅ PR [#4](https://github.com/str1ck0/Circles/pull/4) — merged |
 | Phase 3 — Invitations + notifications | ✅ PR [#5](https://github.com/str1ck0/Circles/pull/5) — merged |
 | Phase 4 — Profiles + user search | ✅ PR [#6](https://github.com/str1ck0/Circles/pull/6) — merged |
-| Phase 5 — UI revamp | 🔄 5a shell ✅ PR [#7](https://github.com/str1ck0/Circles/pull/7) · 5b circle page (`feat/ui-revamp-circle`) · 5c event · 5d dashboard/forms to follow |
+| Phase 5 — UI revamp | 🔄 5a shell ✅ [#7](https://github.com/str1ck0/Circles/pull/7) · 5b circle ✅ [#8](https://github.com/str1ck0/Circles/pull/8) · 5c event ✅ [#9](https://github.com/str1ck0/Circles/pull/9) · 5d dashboard/profile/forms (`feat/ui-revamp-dashboard`) |
 | Phase 6 — Concern extraction + cleanup | ⬜ |
 
 ---
@@ -127,8 +127,13 @@ orbit/ring motif, the dark ground and the orange accent.
   playlists; sticky aside with chat, details (host, dates, visibility, circles), guest
   list grouped by RSVP, and invite-a-circle. `_event_show.scss` deleted; the map
   controller skips mounting without a key or markers.
-- **5d — dashboard, profile, notifications, new circle/event forms** (retire the last
-  compatibility block in `_shell.scss`).
+- **5d — dashboard, profile, people, notifications, invite landing, new circle / new
+  event / edit profile forms**: dashboard becomes a card grid (next up with your RSVP,
+  invites, your circles, people, playlists across circles, discover events); forms use
+  `.page-narrow` + `.container-form-page`, real labels/hints, check-box circle pickers,
+  Tom Select for adding people, a free-text location instead of the capital-city list.
+  The text-scramble and hello controllers, the legacy orbit CSS and the last shell
+  compatibility block are gone.
 
 ## Phase 6 — Concern extraction + cleanup
 

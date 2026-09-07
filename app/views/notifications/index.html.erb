@@ -1,31 +1,34 @@
-<div class="notifications-page">
-  <div class="notifications-header">
-    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
-    <h2>NOTIFICATIONS</h2>
-  </div>
+<% content_for :title, "Notifications" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Notifications</p>
+      <h1>What's new</h1>
+    </div>
+  </header>
 
   <% if @pending_invitations.any? %>
-    <h5 class="notifications-section-title">INVITES</h5>
+    <h2 class="section-title">Invites</h2>
     <% @pending_invitations.each do |invitation| %>
       <div class="invitation-card">
-        <%= user_avatar invitation.inviter %>
+        <%= user_avatar invitation.inviter, class: "ring-avatar ring-avatar-sm" %>
         <p><strong><%= invitation.inviter.full_name %></strong> invited you to join <strong><%= invitation.circle.name %></strong></p>
         <div class="invitation-actions">
-          <%= button_to "Accept", accept_invitation_path(invitation), method: :post, class: "btn global-button-circle-show" %>
-          <%= button_to "Decline", decline_invitation_path(invitation), method: :post, class: "btn global-button-circle-show is-muted" %>
+          <%= button_to "Accept", accept_invitation_path(invitation), method: :post, class: "btn-accent btn-sm" %>
+          <%= button_to "Decline", decline_invitation_path(invitation), method: :post, class: "btn-ghost btn-sm" %>
         </div>
       </div>
     <% end %>
   <% end %>
 
-  <h5 class="notifications-section-title">ACTIVITY</h5>
+  <h2 class="section-title">Activity</h2>
   <% if @notifications.empty? %>
-    <p class="notifications-empty">Nothing yet. Join a circle or RSVP to an event and it'll show up here.</p>
+    <p class="text-dim">Nothing yet. Join a circle or RSVP to an event and it'll show up here.</p>
   <% else %>
     <% @notifications.each do |notification| %>
       <%= link_to notification_path(notification), class: "notification #{'is-unread' unless notification.read?}" do %>
         <% if notification.actor %>
-          <%= user_avatar notification.actor %>
+          <%= user_avatar notification.actor, class: "ring-avatar ring-avatar-sm" %>
         <% else %>
           <span class="notification-icon"><i class="fa-regular fa-bell"></i></span>
         <% end %>

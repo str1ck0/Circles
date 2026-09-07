@@ -59,6 +59,29 @@
   width: 100%;
   max-width: 560px;
   margin: 40px auto;
+
+  &.container-form-page {
+    max-width: none;
+    margin: 0;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  legend.col-form-label {
+    font-family: $headers-font;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    padding-top: 0;
+  }
+
+  .circle-choice {
+    padding: 4px 0 4px 1.6em;
+  }
   padding: 32px;
   border-radius: var(--r-lg);
   background: var(--surface);
@@ -135,3 +158,11 @@ input[type='file'] {
 .ts-dropdown .active { background: var(--surface-2) !important; color: var(--text) !important; }
 .ts-control input { color: var(--text) !important; }
 .ts-wrapper.multi .ts-control > div { background: var(--surface-3); color: var(--text); border-radius: var(--r-pill); }
+
+.danger-zone {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+
+  form { margin: 0; }
+}

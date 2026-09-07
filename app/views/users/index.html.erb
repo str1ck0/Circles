@@ -1,24 +1,27 @@
-<div class="people-page">
-  <div class="notifications-header">
-    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
-    <h2>PEOPLE</h2>
-  </div>
+<% content_for :title, "People" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">People</p>
+      <h1>Find someone</h1>
+    </div>
+  </header>
 
   <%= form_with url: users_path, method: :get, class: "people-search" do |f| %>
     <%= f.search_field :q, value: @query, placeholder: "Search by name or @username", class: "form-control", autofocus: true, autocomplete: "off" %>
-    <%= f.submit "Search", class: "btn global-button-circle-show" %>
+    <%= f.submit "Search", class: "btn-ghost" %>
   <% end %>
 
-  <h5 class="notifications-section-title"><%= @query.present? ? "RESULTS" : "PEOPLE IN YOUR CIRCLES" %></h5>
+  <h2 class="section-title"><%= @query.present? ? "Results" : "People in your circles" %></h2>
 
   <% if @users.empty? %>
-    <p class="notifications-empty">
+    <p class="text-dim">
       <%= @query.present? ? "Nobody matches “#{@query}”." : "Join a circle to start meeting people." %>
     </p>
   <% else %>
     <% @users.each do |person| %>
       <%= link_to user_path(person), class: "person-row" do %>
-        <%= user_avatar person %>
+        <%= user_avatar person, class: "ring-avatar ring-avatar-sm" %>
         <div>
           <p class="person-name"><%= person.full_name %></p>
           <% if person.handle %><p class="person-handle"><%= person.handle %></p><% end %>
