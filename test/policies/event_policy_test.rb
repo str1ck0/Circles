@@ -27,9 +27,10 @@ class EventPolicyTest < ActiveSupport::TestCase
     assert_not EventPolicy.new(nil, @public_event).show?
   end
 
-  test "rsvp requires visibility and not already attending" do
+  test "anyone who can see an event can RSVP, including changing an existing answer" do
     assert EventPolicy.new(@circle_member, @public_event).rsvp?
-    assert_not EventPolicy.new(@attendee, @public_event).rsvp?
+    assert EventPolicy.new(@attendee, @public_event).rsvp?
+    assert EventPolicy.new(@attendee, @private_event).rsvp?
     assert_not EventPolicy.new(@stranger, @public_event).rsvp?
     assert_not EventPolicy.new(@circle_member, @private_event).rsvp?
   end

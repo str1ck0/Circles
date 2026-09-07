@@ -62,7 +62,9 @@ new action that forgets to `authorize` fails loudly. Chat channels identify
 `current_user` from Warden in `ApplicationCable::Connection` and `reject` unless the
 policy's `chat?` allows. Semantics: `private: false` circles are public clubs (visible to
 all, one-click join); private ones are members-only. An event is visible to attendees and,
-unless private, to members of its attached circles.
+unless private, to members of its attached circles. "Attendee" means *any* row on
+`user_events` regardless of its RSVP `status` (`invited`/`going`/`maybe`/`declined`) —
+the guest list is the access list.
 
 **Bill splitting lives on the join table, not the user.** `balance` is a column on
 `user_events`, so it is per-event, not a global wallet. The split arithmetic is in

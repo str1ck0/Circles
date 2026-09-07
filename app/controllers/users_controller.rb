@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   def profile
     skip_authorization
-    @events = policy_scope(Event).includes(:users, photos_attachments: :blob).order(:start_date)
+    @events = policy_scope(Event).includes(:user_events, photos_attachments: :blob).order(:start_date)
   end
 
   def index

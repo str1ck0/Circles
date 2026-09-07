@@ -470,18 +470,49 @@
   }
 }
 
-.loool {
-  padding: 10px;
-  font-size: 20px;
-  color: white;
-  border-radius: 25px;
+.rsvp-group {
+  display: inline-flex;
   border: 1px solid white;
-  background-color: transparent;
-  transition: 0.3s ease;
+  border-radius: 25px;
+  overflow: hidden;
+}
 
-  .loool:hover {
+.rsvp-button {
+  padding: 8px 18px;
+  font-size: 16px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+  transition: 0.2s ease;
+  cursor: pointer;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &:hover {
     background-color: #202124;
   }
+
+  &.is-active {
+    background-color: #ff9d00;
+    color: #18191c;
+    font-weight: 600;
+  }
+}
+
+.rsvp-maybe-count {
+  opacity: 0.7;
+  margin-left: 6px;
+}
+
+.guest-list-heading {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
 }
 
 .container-form {

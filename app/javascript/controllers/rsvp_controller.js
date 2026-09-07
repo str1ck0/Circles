@@ -1,19 +1,19 @@
 import { Controller } from '@hotwired/stimulus';
 import Swal from 'sweetalert2';
 
-// Connects to data-controller="attend"
+// Connects to data-controller="rsvp"
 export default class extends Controller {
-  static targets = ['userCount'];
-  static values = {
-    url: String,
-  };
+  static targets = ['button', 'count'];
+  static values = { url: String };
 
   connect() {
     this.csrfToken = document.querySelector('meta[name="csrf-token"]').content;
   }
 
-  async clicky(event) {
+  async choose(event) {
     event.preventDefault();
+    const status = event.currentTarget.dataset.status;
+
     const response = await fetch(this.urlValue, {
       method: 'POST',
       headers: {
@@ -21,8 +21,8 @@ export default class extends Controller {
         'Content-Type': 'application/json',
         accept: 'application/json',
       },
+      body: JSON.stringify({ user_event: { status } }),
     });
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -30,23 +30,26 @@ export default class extends Controller {
         position: 'bottom-end',
         icon: 'error',
         title: 'NOT ALLOWED',
-        text: data.error || (data.errors && data.errors.join(', ')) || 'Could not join this event',
+        text: data.error || 'Could not update your RSVP',
         showConfirmButton: false,
         timer: 2500,
       });
       return;
     }
 
-    const userCount = data.user_count;
-    this.userCountTarget.innerText = userCount
+    this.buttonTargets.forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.status === data.status);
+    });
+    this.countTargets.forEach((count) => {
+      count.innerText = data.counts[count.dataset.status] ?? 0;
+    });
 
     Swal.fire({
       position: 'bottom-end',
       icon: 'success',
-      title: 'CONFIRMED',
-      text: `There are now ${userCount} people in this event`,
+      title: data.label,
       showConfirmButton: false,
-      timer: 2000,
+      timer: 1500,
     });
   }
 }
