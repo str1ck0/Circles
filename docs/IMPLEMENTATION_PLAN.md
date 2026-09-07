@@ -122,8 +122,13 @@ orbit/ring motif, the dark ground and the orange accent.
   carousel and playlists; sticky aside with the chat panel (`components/_chatroom.scss`,
   shared with events) and the members list. Shared playlist/modal/invite-row styles moved
   to `components/_playlists.scss`; `_circle-show-card.scss` deleted.
-- **5c — event page**, **5d — dashboard, profile, notifications, new circle/event forms**
-  (retire the compatibility block in `_shell.scss` as each lands).
+- **5c — event page**: photo-carousel hero with the RSVP control and live counts; main
+  column with the map (only when geocoded), Splitty (balances + add-a-cost form) and
+  playlists; sticky aside with chat, details (host, dates, visibility, circles), guest
+  list grouped by RSVP, and invite-a-circle. `_event_show.scss` deleted; the map
+  controller skips mounting without a key or markers.
+- **5d — dashboard, profile, notifications, new circle/event forms** (retire the last
+  compatibility block in `_shell.scss`).
 
 ## Phase 6 — Concern extraction + cleanup
 

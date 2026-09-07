@@ -196,23 +196,12 @@
   flex-wrap: wrap;
 }
 
-// --- Compatibility for pages not yet rebuilt (event, circle, dashboard) ----
-// They were laid out against the viewport; inside the shell they need to size to the
-// main column instead. Remove these as each page gets its own revamp PR.
-.app-main {
-  .event-main-container,
-  .dashboard-main-container {
-    width: auto;
-    max-width: var(--content-max);
-    padding-left: var(--gutter);
-    padding-right: var(--gutter);
-  }
-
-  .event-header {
-    position: sticky;
-    left: auto;
-    right: auto;
-  }
-
-  .event-main-container { margin-top: 32px; }
+// --- Compatibility for the dashboard until it's rebuilt (5d) -----------------
+// It was laid out against the viewport; inside the shell it needs to size to the main
+// column instead.
+.app-main .dashboard-main-container {
+  width: auto;
+  max-width: var(--content-max);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
