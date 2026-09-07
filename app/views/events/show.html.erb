@@ -1,49 +1,14 @@
 <% event_policy = policy(@event) %>
-<div class="event-header" data-controller="rsvp" data-rsvp-url-value="<%= event_user_events_url(@event) %>">
-  <div class="event-header-left">
-    <h1><%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %></h1>
-  </div>
-  <div class="event-header-middle">
-    <div class="event-header-middle-title">
-      <h2><%= @event.title.upcase %></h2>
-    </div>
-    <div class="event-header-middle-info">
-      <p>
-        <i class="fa-solid fa-user-group"></i>
-        <span data-rsvp-target="count" data-status="going"><%= @rsvp_counts["going"] %></span> going
-        <span class="rsvp-maybe-count">· <span data-rsvp-target="count" data-status="maybe"><%= @rsvp_counts["maybe"] %></span> maybe</span>
-        <% if @event.private? %>
-          <i class="fa-solid fa-lock"></i> Private
-        <% else %>
-          <i class="fa-solid fa-unlock"></i> Public
-        <% end %>
-      </p>
-      <p><%= @event.start_date.strftime("%a, %b %d") %> - <%= @event.end_date.strftime("%a, %b %d") %></p>
-    </div>
-  </div>
-  <div class="event-header-right">
-    <% if event_policy.rsvp? %>
-      <div class="rsvp-group" role="group" aria-label="RSVP">
-        <% { "going" => "Going", "maybe" => "Maybe", "declined" => "Can't go" }.each do |status, label| %>
-          <button type="button"
-                  class="rsvp-button <%= 'is-active' if @user_event&.status == status %>"
-                  data-rsvp-target="button"
-                  data-status="<%= status %>"
-                  data-action="click->rsvp#choose"><%= label %></button>
-        <% end %>
-      </div>
-    <% end %>
-  </div>
-</div>
-<div class="event-main-container">
-  <div class="event-left-side-container">
-    <div class="event-left-side-banner">
-      <div class="event-show-carousel-container">
-        <div id="eventPhotos" class="carousel slide event-show-carousel-slide" data-bs-ride="carousel">
+<% content_for :title, @event.title %>
+<div class="event-page">
+  <header class="event-hero">
+    <div class="event-hero-media">
+      <% if @event.photos.attached? %>
+        <div id="eventPhotos" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-inner">
             <% @event.photos.each_with_index do |photo, index| %>
               <div class="carousel-item <%= 'active' if index.zero? %>">
-                <%= image_tag photo, class: "d-block w-100 event-photo" %>
+                <%= image_tag photo, alt: "" %>
               </div>
             <% end %>
           </div>
@@ -58,18 +23,126 @@
             </button>
           <% end %>
         </div>
-      </div>
+      <% else %>
+        <div class="event-hero-fallback"></div>
+      <% end %>
     </div>
-    <div class="event-left-side-bottom">
-      <div class="event-show-chatroom-container">
-        <div class="event-show-chatroom-header">
-          <h5><%= @event.title.upcase %> CHAT</h5>
+
+    <div class="event-hero-body" data-controller="rsvp" data-rsvp-url-value="<%= event_user_events_url(@event) %>">
+      <div class="event-hero-text">
+        <p class="eyebrow">
+          <%= @event.start_date.strftime("%A, %-d %B") %>
+          <% if @circles.any? %> · <%= @circles.map(&:name).join(", ") %><% end %>
+        </p>
+        <h1><%= @event.title %></h1>
+        <p class="event-hero-meta">
+          <span><i class="fa-solid fa-location-dot"></i> <%= @event.location %></span>
+          <span>
+            <i class="fa-solid fa-user-group"></i>
+            <span data-rsvp-target="count" data-status="going"><%= @rsvp_counts["going"] %></span> going ·
+            <span data-rsvp-target="count" data-status="maybe"><%= @rsvp_counts["maybe"] %></span> maybe
+          </span>
+          <span><i class="fa-solid <%= @event.private? ? 'fa-lock' : 'fa-unlock' %>"></i> <%= @event.private? ? "Private" : "Open to the circle" %></span>
+        </p>
+      </div>
+      <% if event_policy.rsvp? %>
+        <div class="event-hero-actions">
+          <p class="eyebrow">Are you in?</p>
+          <div class="rsvp-group" role="group" aria-label="RSVP">
+            <% { "going" => "Going", "maybe" => "Maybe", "declined" => "Can't go" }.each do |status, label| %>
+              <button type="button"
+                      class="rsvp-button <%= 'is-active' if @user_event&.status == status %>"
+                      data-rsvp-target="button"
+                      data-status="<%= status %>"
+                      data-action="click->rsvp#choose"><%= label %></button>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </header>
+
+  <div class="event-layout">
+    <div class="event-main">
+      <% if @marker.any? %>
+        <section class="event-section">
+          <h2 class="section-title">Where</h2>
+          <div class="event-map"
+               data-controller="map"
+               data-map-markers-value="<%= @marker.to_json %>"
+               data-map-api-key-value="<%= ENV['MAPBOX_API_KEY'] %>"></div>
+          <p class="text-dim mt-2 mb-0"><i class="fa-solid fa-location-dot"></i> <%= @event.location %></p>
+        </section>
+      <% end %>
+
+      <% if event_policy.add_payment? %>
+        <section class="event-section">
+          <h2 class="section-title">Splitty</h2>
+          <div class="splitty">
+            <div class="splitty-balances">
+              <p class="eyebrow">Balances</p>
+              <% balances = @event.user_events.includes(:user).sort_by { |ue| -ue.balance.abs } %>
+              <ul class="balance-list">
+                <% balances.each do |user_event| %>
+                  <li>
+                    <%= user_avatar user_event.user, class: "ring-avatar ring-avatar-xs" %>
+                    <span class="balance-name"><%= user_event.user.first_name %></span>
+                    <span class="balance-amount <%= user_event.balance.positive? ? 'is-owed' : (user_event.balance.negative? ? 'is-owing' : '') %>">
+                      <%= user_event.balance.positive? ? "+" : "" %>R <%= user_event.balance %>
+                    </span>
+                  </li>
+                <% end %>
+              </ul>
+              <p class="text-faint splitty-hint">Positive means the group owes them; negative means they owe the group.</p>
+            </div>
+            <div class="splitty-form">
+              <p class="eyebrow">Add a cost</p>
+              <%= simple_form_for [@event, @payment] do |f| %>
+                <div class="row g-2">
+                  <div class="col-5"><%= f.input :amount, label: "Amount (R)", input_html: { min: 1, step: 1, inputmode: "numeric" } %></div>
+                  <div class="col-7"><%= f.input :description, placeholder: "Pizza, tickets…" %></div>
+                </div>
+                <%= f.association :user_event, label: "Who paid?", collection: @going_user_events, label_method: :user_name, required: false, include_blank: "Pick a payer" %>
+                <p class="form-label">Split between</p>
+                <div class="splittee-grid">
+                  <%= f.association :user_events, as: :check_boxes, collection: @going_user_events, label: false, label_method: :user_name %>
+                </div>
+                <%= f.button :submit, "Add to the Splitty", class: "btn-accent btn-sm" %>
+              <% end %>
+            </div>
+          </div>
+        </section>
+      <% end %>
+
+      <section class="event-section">
+        <h2 class="section-title">
+          Playlists
+          <% if event_policy.add_playlist? %>
+            <button type="button" class="section-title-action" data-bs-toggle="modal" data-bs-target="#addPlaylist" title="Add a playlist"><i class="fa-solid fa-plus"></i></button>
+          <% end %>
+        </h2>
+        <% if @event.event_playlists.any? %>
+          <div class="playlists-grid">
+            <% @event.event_playlists.each do |playlist| %>
+              <iframe title="Spotify playlist" src="https://open.spotify.com/embed/playlist/<%= playlist.embed_url %>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-dim">No playlists yet<%= event_policy.add_playlist? ? " — add a Spotify link." : "." %></p>
+        <% end %>
+      </section>
+    </div>
+
+    <aside class="event-aside">
+      <div class="chat-panel">
+        <div class="chat-panel-header">
+          <h2>Chat</h2>
+          <span class="text-faint"><%= @event.title %></span>
         </div>
         <% if event_policy.chat? %>
-          <div class="event-show-chatroom" data-controller="event-chatroom-subscription" data-event-chatroom-subscription-chatroom-id-value="<%= @event.id %>" data-event-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
-
+          <div class="chat-panel-body" data-controller="event-chatroom-subscription" data-event-chatroom-subscription-chatroom-id-value="<%= @event.id %>" data-event-chatroom-subscription-current-user-id-value="<%= current_user.id %>">
             <div class="messages" data-event-chatroom-subscription-target="messages">
-              <% @event.event_messages.each do |event_message| %>
+              <% @event.event_messages.includes(:user).each do |event_message| %>
                 <div class="message-row d-flex <%= event_message.sender?(current_user) ? 'justify-content-end' : 'justify-content-start' %>">
                   <div class="<%= event_message.sender?(current_user) ? 'sender-style' : 'receiver-style' %>">
                     <%= render "event_messages/event_message", event_message: event_message %>
@@ -77,175 +150,107 @@
                 </div>
               <% end %>
             </div>
-            <%= simple_form_for [@event, EventMessage.new], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "d-flex" } do |f| %>
-            <%= f.input :content, label: false, placeholder: "Message #{@event.title}", wrapper_html: {class: "flex-grow-1"} %>
-            <%= f.submit "Send", class: "global-button-chat" %>
+            <%= simple_form_for [@event, EventMessage.new], html: { data: { action: "turbo:submit-end->event-chatroom-subscription#resetForm" }, class: "chat-form" } do |f| %>
+              <%= f.input :content, label: false, placeholder: "Message #{@event.title}", wrapper_html: { class: "flex-grow-1 mb-0" }, input_html: { rows: 1, autocomplete: "off" } %>
+              <%= f.button :submit, "Send", class: "btn-accent btn-sm" %>
             <% end %>
           </div>
         <% else %>
-          <div class="event-show-chatroom">
-            <p class="p-3">RSVP to join the chat.</p>
+          <div class="chat-panel-locked">
+            <i class="fa-solid fa-lock"></i>
+            <p>RSVP to join the chat.</p>
           </div>
-        <% end %>
-      </div>
-      <div class="event-right-side-music">
-      <div class="spotify-playlists-header">
-        <h5>EVENT PLAYLISTS</h5>
-        <% if event_policy.add_playlist? %>
-          <!-- Playlist Button trigger modal -->
-          <button type="button" class="global-button" id="playlist-button" data-bs-toggle="modal" data-bs-target="#addPlaylist">
-            <h5>+</h5>
-          </button>
-        <% end %>
-      </div>
-      <div class="event-playlists-grid">
-        <% @event.event_playlists.each do |playlist| %>
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/<%=playlist.embed_url%>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         <% end %>
       </div>
 
-        <% if event_policy.add_playlist? %>
-        <!-- Modal -->
-        <div class="modal fade" id="addPlaylist" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddPlaylistLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content modal-content-circle-show">
-              <div class="modal-header">
-                <i class="fa-brands fa-spotify"></i>
-                <h1 class="modal-title fs-5" id="AddPlaylistLabel">Add a Playlist</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body modal-body-content">
-                <%= simple_form_for [@event, @event_playlist] do |f| %>
-                  <%= f.input :url, label: 'Enter the link to your playlist' %>
-                  <%= f.submit "Add" %>
+      <div class="side-panel">
+        <div class="chat-panel-header"><h2>Details</h2></div>
+        <dl class="detail-list">
+          <div>
+            <dt>Hosted by</dt>
+            <dd>
+              <%= link_to user_path(@event.user), class: "detail-person" do %>
+                <%= user_avatar @event.user, class: "ring-avatar ring-avatar-xs" %>
+                <span><%= @event.user.full_name %></span>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt>Starts</dt>
+            <dd><%= @event.start_date.strftime("%a %-d %b %Y") %></dd>
+          </div>
+          <div>
+            <dt>Ends</dt>
+            <dd><%= @event.end_date.strftime("%a %-d %b %Y") %></dd>
+          </div>
+          <div>
+            <dt>Visibility</dt>
+            <dd><%= @event.private? ? "Private — guest list only" : "Everyone in the attached circles" %></dd>
+          </div>
+          <% if @circles.any? %>
+            <div>
+              <dt>Circles</dt>
+              <dd class="detail-circles">
+                <% @circles.each do |circle| %>
+                  <%= render "shared/circle_avatar", circle: circle, size: "xs" %>
                 <% end %>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              </div>
+              </dd>
             </div>
-          </div>
-        </div>
-        <% end %>
+          <% end %>
+        </dl>
       </div>
-    </div>
-    <div class="event-left-side-anker">
-      <% if event_policy.add_payment? %>
-      <div class="anker-splitty">
-        <div class="splitty">
-          <h5>SPLITTY - EVENT COSTS</h5>
-          <div class="splitty-body">
-            <div class="splitty-people">
-              <% @event.user_events.includes(:user).sort_by { |ue| -ue.balance.abs }.each do |user_event| %>
-                <p><%= user_event.user.first_name %>: R <%= user_event.balance %></p>
-              <% end %>
-            </div>
-            <%= simple_form_for [@event, @payment] do |f| %>
-              <%= f.input :amount %>
-              <%= f.input :description %>
-              <%= f.association :user_event, label: "Payer", collection: @going_user_events, label_method: :user_name, required: false %>
-              <p>Who's splittin' this?</p>
-              <div class="potential-splitters mb-3">
-                <%= f.association :user_events, as: :check_boxes, collection: @going_user_events, label: "", label_method: :user_name %>
-              </div>
-              <%= f.submit "Pop it on the Splitty!", class: "global-button-splitty" %>
+
+      <div class="side-panel">
+        <div class="chat-panel-header">
+          <h2>Guest list</h2>
+          <span class="text-faint"><%= @event.user_events.size %></span>
+        </div>
+        <% { "going" => "Going", "maybe" => "Maybe", "invited" => "Invited", "declined" => "Can't make it" }.each do |status, heading| %>
+          <% guests = @guest_list[status] || [] %>
+          <% next if guests.empty? %>
+          <p class="guest-list-heading"><%= heading %> · <%= guests.size %></p>
+          <ul class="members-list">
+            <% guests.each do |user_event| %>
+              <li>
+                <%= link_to user_path(user_event.user) do %>
+                  <%= user_avatar user_event.user, class: "ring-avatar ring-avatar-xs" %>
+                  <span><%= user_event.user.full_name %></span>
+                <% end %>
+              </li>
             <% end %>
-          </div>
-        </div>
-      </div>
-      <% end %>
-      <div class="event-right-side-location">
-        <h5><i class="fa-solid fa-location-dot"></i> LOCATION : <%= @event.location %></h5>
-        <div class="event-right-side-location-body">
-          <div class="event-right-side-location-body-address d-flex"></div>
-        </div>
-        <div class="event-right-side-map">
-          <div class="event-show-details-info-location">
-            <div class="event-show-details-info-location-map"
-              data-controller="map"
-              data-map-markers-value="<%= @marker.to_json %>"
-              data-map-api-key-value="<%= ENV['MAPBOX_API_KEY'] %>">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="event-right-side-container">
-    <div class="event-right-side-host">
-      <h5>HOSTED BY</h5>
-      <div class="event-right-side-host-card">
-        <%= link_to user_path(@event.user) do %>
-          <div class="event-right-side-host-body">
-            <%= user_avatar @event.user %>
-            <div class="event-right-side-host-info">
-              <h4><%= @event.user.full_name %></h4>
-              <p>Joined <%= @event.user.created_at.strftime("%b %Y") %></p>
-            </div>
-          </div>
+          </ul>
         <% end %>
       </div>
-    </div>
-    <% if event_policy.attach_circle? %>
-    <div class="event-right-side-invite">
-      <h5>INVITE A CIRCLE</h5>
-      <div class="circle-grid">
-        <% @circles.each do |circle| %>
-          <%= render "shared/circle_avatar", circle: circle %>
-        <% end %>
-      </div>
-      <% if @attachable_circles.any? %>
-        <%= simple_form_for [@event, @circle_event] do |f| %>
-          <div class="event-right-side-invite-body">
-            <div class="event-right-side-invite-body-circles">
-              <%= f.association :circle, as: :radio_buttons, required: false, label: "", collection: @attachable_circles %>
-            </div>
-          </div>
-          <%= f.button :submit, "Add Circle", class:"event-add-circle-button" %>
-        <% end %>
-      <% end %>
-    </div>
-    <% end %>
-      <div class="event-right-side-details">
-        <div class="event-right-side-details-header">
-          <h5>DETAILS</h5>
-        </div>
-        <div class="event-right-side-details-body">
-          <div class="event-right-side-details-date d-flex">
-            <p><i class="fa-solid fa-calendar-days"></i></p>
-            <p><strong>START:</strong> <%= @event.start_date.strftime("%A, %B %d, %Y") %> <br> <strong>END:</strong> <%= @event.end_date.strftime("%A, %B %d, %Y") %></p>
-          </div>
-          <div class="event-right-side-details-private d-flex">
-            <% if @event.private? %>
-              <p><i class="fa-solid fa-lock"></i></p>
-              <p>Private Event</p>
-            <% else %>
-              <p><i class="fa-solid fa-unlock"></i></p>
-              <p>Public Event</p>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      <div class="anker-member">
-        <h5>GUEST LIST</h5>
-        <div class="anker-member-info">
-          <% { "going" => "Going", "maybe" => "Maybe", "invited" => "Invited", "declined" => "Can't make it" }.each do |status, heading| %>
-            <% guests = @guest_list[status] || [] %>
-            <% next if guests.empty? %>
-            <p class="guest-list-heading"><%= heading %> · <%= guests.size %></p>
-            <ul>
-              <% guests.each do |user_event| %>
-                <li>
-                  <%= link_to user_path(user_event.user), class: "d-flex align-items-center" do %>
-                    <%= user_avatar user_event.user %>
-                    <p><%= user_event.user.full_name %></p>
-                  <% end %>
-                </li>
-              <% end %>
-            </ul>
+
+      <% if event_policy.attach_circle? && @attachable_circles.any? %>
+        <div class="side-panel">
+          <div class="chat-panel-header"><h2>Invite a circle</h2></div>
+          <p class="text-dim side-panel-lede">Everyone in the circle lands on the guest list as invited.</p>
+          <%= simple_form_for [@event, @circle_event] do |f| %>
+            <%= f.association :circle, as: :radio_buttons, required: false, label: false, collection: @attachable_circles, item_wrapper_class: "form-check circle-choice" %>
+            <%= f.button :submit, "Add circle", class: "btn-ghost btn-sm" %>
           <% end %>
         </div>
+      <% end %>
+    </aside>
+  </div>
+
+  <% if event_policy.add_playlist? %>
+    <div class="modal fade" id="addPlaylist" tabindex="-1" aria-labelledby="addPlaylistLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addPlaylistLabel"><i class="fa-brands fa-spotify"></i> Add a playlist</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <%= simple_form_for [@event, @event_playlist] do |f| %>
+              <%= f.input :url, label: "Spotify playlist link", placeholder: "https://open.spotify.com/playlist/…" %>
+              <%= f.button :submit, "Add playlist", class: "btn-accent" %>
+            <% end %>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 </div>

@@ -17,7 +17,7 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "rsvp-group"
     assert_not_includes response.body, "event-chatroom-subscription"
-    assert_not_includes response.body, "SPLITTY"
+    assert_not_includes response.body, "Splitty"
   end
 
   test "a circle member cannot view the circle's private event unless enrolled" do
@@ -33,12 +33,13 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the host sees the chat, splitty and circle-invite controls" do
+    create_circle(owner: @host, private: true)
     sign_in @host
     get event_path(@event)
     assert_response :success
     assert_includes response.body, "event-chatroom-subscription"
-    assert_includes response.body, "SPLITTY"
-    assert_includes response.body, "INVITE A CIRCLE"
+    assert_includes response.body, "Splitty"
+    assert_includes response.body, "Invite a circle"
   end
 
   test "creating an event ignores circles the creator doesn't belong to and enrols members" do
