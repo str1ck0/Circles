@@ -1,0 +1,29 @@
+<div class="people-page">
+  <div class="notifications-header">
+    <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
+    <h2>PEOPLE</h2>
+  </div>
+
+  <%= form_with url: users_path, method: :get, class: "people-search" do |f| %>
+    <%= f.search_field :q, value: @query, placeholder: "Search by name or @username", class: "form-control", autofocus: true, autocomplete: "off" %>
+    <%= f.submit "Search", class: "btn global-button-circle-show" %>
+  <% end %>
+
+  <h5 class="notifications-section-title"><%= @query.present? ? "RESULTS" : "PEOPLE IN YOUR CIRCLES" %></h5>
+
+  <% if @users.empty? %>
+    <p class="notifications-empty">
+      <%= @query.present? ? "Nobody matches “#{@query}”." : "Join a circle to start meeting people." %>
+    </p>
+  <% else %>
+    <% @users.each do |person| %>
+      <%= link_to user_path(person), class: "person-row" do %>
+        <%= user_avatar person %>
+        <div>
+          <p class="person-name"><%= person.full_name %></p>
+          <% if person.handle %><p class="person-handle"><%= person.handle %></p><% end %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

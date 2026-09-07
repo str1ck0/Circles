@@ -19,8 +19,8 @@ without rebuilding the stack.
 | Audit | ✅ [Findings report](https://claude.ai/code/artifact/65ee6d6f-ba2f-483d-94df-a0d33c79dfed) — 9 critical, 3 high, 1 medium, 3 low |
 | Phase 1 — Authorization foundation | ✅ PR [#3](https://github.com/str1ck0/Circles/pull/3) — merged, live |
 | Phase 2 — RSVP states | ✅ PR [#4](https://github.com/str1ck0/Circles/pull/4) — merged |
-| Phase 3 — Invitations + notifications | 🔄 In progress (`feat/invitations-notifications`) |
-| Phase 4 — Profiles + user search | ⬜ |
+| Phase 3 — Invitations + notifications | ✅ PR [#5](https://github.com/str1ck0/Circles/pull/5) — merged |
+| Phase 4 — Profiles + user search | 🔄 In progress (`feat/profiles-search`) |
 | Phase 5 — UI revamp | ⬜ |
 | Phase 6 — Concern extraction + cleanup | ⬜ |
 
@@ -97,11 +97,14 @@ Coupled because an invite *is* a notification.
   Unread badge in the home sidebar, `/notifications` marks everything read on view,
   clicking one marks it read and redirects to its subject.
 
-## Phase 4 — Profiles + user search
+## Phase 4 — Profiles + user search 🔄
 
-`users#show` public profile (avatar, name, username, bio, shared circles), `users#index`
-name/username search (also feeds the invite flow). Adds `users.bio`. Replaces the current
-`dashboard/:id` for other people; own dashboard stays.
+`users#show` public profile (avatar, name, `@username`, bio, joined date, the circles the
+*viewer* may see via `policy_scope`, upcoming events). `users#index` is the people
+directory: defaults to your circle-mates, searches everyone by name/username
+(`User.search`, also used by the invite modal). Adds `users.bio`; the Devise edit form now
+covers photo, names, username and bio. `dashboard/:id` for anyone but yourself redirects
+to their profile. The dead `users#profile` route and the Le Wagon navbar partial are gone.
 
 ## Phase 5 — UI revamp
 
@@ -115,7 +118,6 @@ keep the orbit/ring motif.
 Only once Phases 1–3 have settled the behaviour on both sides of the mirror:
 
 - Shared concern for membership checks, message posting, playlist creation (audit DUP-01).
-- Delete `app/views/shared/_navbar.html.erb` (dead, Le Wagon-branded).
 - Move the favicon into the repo's assets.
 - Paginate/limit the home feed.
 

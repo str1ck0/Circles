@@ -11,7 +11,7 @@
       </div>
       <% if user_signed_in? %>
         <div class="profile-container">
-          <%= link_to dashboard_path(current_user) do %>
+          <%= link_to user_path(current_user), title: "Your profile" do %>
             <% if current_user.photo.attached? %>
               <%= image_tag current_user.photo, class: "circle-avatar" %>
             <% else %>
@@ -36,6 +36,7 @@
         <div class="spacer"></div>
         <%= link_to "New Circle", new_circle_path, class: "hover-underline-animation" %>
         <%= link_to "New Event", new_event_path, class: "hover-underline-animation" %>
+        <%= link_to "Find people", users_path, class: "hover-underline-animation" %>
         <%= link_to notifications_path, class: "hover-underline-animation notifications-link" do %>
           Notifications<% if unread_notifications_count.positive? %> <span class="unread-badge"><%= unread_notifications_count %></span><% end %>
         <% end %>
