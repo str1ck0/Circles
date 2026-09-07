@@ -1,0 +1,15 @@
+<div class="circle-card">
+  <%= render "shared/circle_avatar", circle: circle, size: "md" %>
+  <div class="circle-card-body">
+    <h3><%= link_to circle.name, circle_path(circle) %></h3>
+    <p>
+      <i class="fa-solid fa-user-group"></i> <%= pluralize(circle.users.size, "member") %>
+      · <%= circle.private? ? "Private" : "Open" %>
+    </p>
+    <% if user_signed_in? && policy(circle).join? %>
+      <%= button_to "Join", circle_user_circles_path(circle), method: :post, class: "btn-ghost btn-sm" %>
+    <% elsif !user_signed_in? %>
+      <%= link_to "Log in to join", new_user_session_path, class: "btn-ghost btn-sm" %>
+    <% end %>
+  </div>
+</div>

@@ -1,53 +1,84 @@
-// Graphical variables
+// Design foundations
 @import 'config/fonts';
 @import 'config/colors';
 @import 'config/bootstrap_variables';
 
-// External libraries
+// Vendor
 @import 'bootstrap/scss/bootstrap';
 @import 'font-awesome';
 @import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder';
-
-// Your CSS partials
-@import 'components/index';
-@import 'pages/index';
 @import 'flatpickr/dist/flatpickr.css';
 @import 'flatpickr/dist/themes/dark.css';
 @import '@splidejs/splide/dist/css/splide.min.css';
+@import 'tom-select/dist/css/tom-select.css';
 
+// Tokens (after Bootstrap so its variables are resolved) and app styles
+@import 'config/tokens';
 @import 'components/index';
 @import 'pages/index';
-@import 'components/footer';
 
-@import "tom-select/dist/css/tom-select.css";
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 body {
-  background-color: #18191c;
+  background-color: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-// Everything above the footer grows to fill the viewport so the footer sits at
-// the bottom even on short pages (login, sign up).
+// Everything above the footer grows to fill the viewport so the footer sits at the
+// bottom even on short pages (login, sign up).
 .mouse-cursor-gradient-tracking {
   flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.red-border {
-  border: 1px solid red;
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 0.01em;
 }
 
-.blue-border {
-  border: 1px solid blue;
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
-.green-border {
-  border: 1px solid green;
+// Shared typographic roles
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0 0 6px;
 }
 
-.spacer {
-  min-height: 60px;
+.section-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 }
 
-// this is a random change to the file
+.text-dim { color: var(--text-dim); }
+.text-faint { color: var(--text-faint); }
+
+.spacer { min-height: 60px; }

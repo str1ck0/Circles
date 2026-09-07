@@ -20,8 +20,8 @@ without rebuilding the stack.
 | Phase 1 — Authorization foundation | ✅ PR [#3](https://github.com/str1ck0/Circles/pull/3) — merged, live |
 | Phase 2 — RSVP states | ✅ PR [#4](https://github.com/str1ck0/Circles/pull/4) — merged |
 | Phase 3 — Invitations + notifications | ✅ PR [#5](https://github.com/str1ck0/Circles/pull/5) — merged |
-| Phase 4 — Profiles + user search | 🔄 In progress (`feat/profiles-search`) |
-| Phase 5 — UI revamp | ⬜ |
+| Phase 4 — Profiles + user search | ✅ PR [#6](https://github.com/str1ck0/Circles/pull/6) — merged |
+| Phase 5 — UI revamp | 🔄 5a shell + tokens + home + auth (`feat/ui-revamp-shell`); 5b circle, 5c event, 5d dashboard/forms to follow |
 | Phase 6 — Concern extraction + cleanup | ⬜ |
 
 ---
@@ -106,12 +106,19 @@ directory: defaults to your circle-mates, searches everyone by name/username
 covers photo, names, username and bio. `dashboard/:id` for anyone but yourself redirects
 to their profile. The dead `users#profile` route and the Le Wagon navbar partial are gone.
 
-## Phase 5 — UI revamp
+## Phase 5 — UI revamp 🔄
 
-Screen by screen, each its own PR: design tokens + layout shell first (sidebar, main,
-responsive breakpoints, sticky footer), then Devise pages, home/discover, circle page,
-event page, profile/dashboard, notifications. Rewrite SCSS cleanly on top of Bootstrap;
-keep the orbit/ring motif.
+Screen by screen, each its own PR. Rewrite SCSS cleanly on top of Bootstrap; keep the
+orbit/ring motif, the dark ground and the orange accent.
+
+- **5a — foundations + shell + home + auth** (this PR): tokens (`config/_colors.scss`,
+  `_tokens.scss`, `_bootstrap_variables.scss`), Josefin Sans (display) + Work Sans (body),
+  the app shell with a persistent sidebar (nav, actions, circle rails, unread badge) that
+  collapses to a top bar under 992px, `.btn-accent`/`.btn-ghost`, ringed avatars, event
+  and circle cards, toast flashes, slim footer, the signed-out landing with the orbit,
+  Devise pages as a centred card. Older pages get a compatibility block in `_shell.scss`.
+- **5b — circle page**, **5c — event page**, **5d — dashboard, profile, notifications,
+  new circle/event forms** (retire the compatibility block as each lands).
 
 ## Phase 6 — Concern extraction + cleanup
 

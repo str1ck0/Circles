@@ -1,0 +1,59 @@
+<aside class="app-sidebar">
+  <div class="sidebar-brand">
+    <%= link_to root_path do %>
+      <%= image_tag "Logo/Circles_Logo.svg", class: "white-color", alt: "Circles" %>
+    <% end %>
+  </div>
+
+  <%= link_to user_path(current_user), class: "sidebar-user", title: "Your profile" do %>
+    <%= user_avatar current_user, class: "ring-avatar ring-avatar-sm" %>
+    <span>
+      <span class="sidebar-user-name"><%= current_user.first_name %></span>
+      <% if current_user.handle %><span class="sidebar-user-handle"><%= current_user.handle %></span><% end %>
+    </span>
+  <% end %>
+
+  <nav class="sidebar-nav" aria-label="Main">
+    <%= sidebar_link "Home", root_path, "fa-solid fa-house" %>
+    <%= sidebar_link "People", users_path, "fa-solid fa-user-group" %>
+    <%= link_to notifications_path, class: "sidebar-link notifications-link #{'is-active' if current_page?(notifications_path)}" do %>
+      <i class="fa-regular fa-bell"></i><span>Notifications</span>
+      <% if unread_notifications_count.positive? %><span class="unread-badge"><%= unread_notifications_count %></span><% end %>
+    <% end %>
+    <%= sidebar_link "Dashboard", dashboard_path(current_user), "fa-solid fa-gauge-high" %>
+  </nav>
+
+  <div class="sidebar-actions">
+    <%= link_to new_circle_path, class: "btn-accent btn-sm" do %><i class="fa-solid fa-plus"></i> New circle<% end %>
+    <%= link_to new_event_path, class: "btn-ghost btn-sm" do %><i class="fa-regular fa-calendar-plus"></i> New event<% end %>
+  </div>
+
+  <div class="sidebar-section">
+    <p class="eyebrow">Your circles</p>
+    <div class="ring-rail">
+      <% sidebar_circles.each do |circle| %>
+        <%= render "shared/circle_avatar", circle: circle, size: "sm" %>
+      <% end %>
+      <% if sidebar_circles.empty? %>
+        <p class="text-faint" style="font-size: 0.8rem; margin: 0 0 0 8px;">None yet</p>
+      <% end %>
+    </div>
+  </div>
+
+  <% if sidebar_discover_circles.any? %>
+    <div class="sidebar-section">
+      <p class="eyebrow">Discover</p>
+      <div class="ring-rail">
+        <% sidebar_discover_circles.each do |circle| %>
+          <%= render "shared/circle_avatar", circle: circle, size: "sm" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="sidebar-foot">
+    <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "sidebar-link" do %>
+      <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Log out</span>
+    <% end %>
+  </div>
+</aside>

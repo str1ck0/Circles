@@ -1,26 +1,5 @@
 <div class="cards-event">
   <% @events.each do |event| %>
-    <%= link_to event_path(event) do %>
-      <div class="event-card">
-        <div class="title-container">
-          <p><%= event.title.upcase %></p>
-        </div>
-        <% background = event.photos.attached? ? url_for(event.photos.first) : asset_path('avatar/CirclesAvatar.png') %>
-        <div class="image-icon-container" style="background-image: linear-gradient(to bottom, black, black 5%, transparent, transparent 95%), url(<%= background %>);">
-          <div class="icons">
-            <div class="attending">
-              <i class="fa-solid fa-user-group"></i>
-              <p><%= event.going_count %></p>
-            </div>
-            <% if event.private? %>
-              <i class="fa-solid fa-circle"> </i>
-            <% else %>
-              <i class="fa-regular fa-circle"></i>
-            <% end %>
-            <p><%= event.start_date.strftime("%m/%d") %></p>
-          </div>
-        </div>
-      </div>
-    <% end %>
+    <%= render "shared/event_card", event: event %>
   <% end %>
 </div>

@@ -46,6 +46,15 @@ User ──user_circles──> Circle ──circle_events──> Event <──us
 separate from its members — added later, so older code may assume membership implies
 ownership.
 
+**UI system.** Design tokens live in `app/assets/stylesheets/config/` (`_colors.scss` →
+SCSS vars, `_tokens.scss` → CSS custom properties, `_bootstrap_variables.scss` → Bootstrap
+overrides so forms/modals are dark by default). The signed-in layout is the shell in
+`components/_shell.scss` + `shared/_sidebar.html.erb` (sidebar on desktop, top bar under
+992px); pages wrap content in `.page` / `.page-header`. Buttons are `.btn-accent` (the one
+primary action) and `.btn-ghost`; avatars are `.ring-avatar` with `style="--ring: #hex"`.
+Pages not yet rebuilt (circle, event, dashboard) rely on the "compatibility" block at the
+bottom of `_shell.scss` — delete their entries as each page is revamped.
+
 **Circles and events are near-perfect mirrors of each other.** Each has its own messages
 model, Action Cable channel, Stimulus subscription controller, and playlists model
 (`circle_messages`/`event_messages`, `CircleChatroomChannel`/`EventChatroomChannel`,
@@ -101,10 +110,13 @@ failure:
   at exit.
 - `config.assets.css_compressor = nil` — mirrors production; without it
   sassc-rails adds a compressor pass that can't parse tom-select's `max(var(--x), …)`.
-- **Never build a production-mode Sprockets environment locally** (e.g.
-  `Sprockets::Railtie.build_environment` in a runner). It poisons the shared
-  `tmp/cache/assets`, after which view tests fail with `AssetNotPrecompiledError` for
-  `application.css`. Fix: `rm -rf tmp/cache/assets`.
+- **If view tests fail with `AssetNotPrecompiledError` for `application.css`, the
+  Sprockets cache is poisoned** — `rm -rf tmp/cache/assets` and rerun. It happens after any
+  failed CSS compile (a Sass error in a partial) and after building a production-mode
+  Sprockets environment locally. Fix the CSS first, then clear the cache.
+- **libsass (sassc) evaluates CSS `min()`/`max()` as Sass functions** and can't mix units
+  or `var()`/`calc()` inside them. Use `width` + `max-width`, or media queries, instead.
+  `clamp()` and `minmax()` are fine (not Sass functions).
 
 Routes are deliberately trimmed to implemented actions only, so scaffold-style tests and
 `link_to` helpers for unimplemented CRUD will not resolve.

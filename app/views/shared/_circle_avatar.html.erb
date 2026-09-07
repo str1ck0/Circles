@@ -1,7 +1,8 @@
+<% size = local_assigns.fetch(:size, "md") %>
 <%= link_to circle_path(circle), title: circle.name do %>
   <% if circle.photo.attached? %>
-    <%= image_tag circle.photo, class: "circle-avatar", style: "border-color: #{circle.border_color}", alt: circle.name %>
+    <%= image_tag circle.photo, class: "ring-avatar ring-avatar-#{size}", style: "--ring: #{circle.border_color}", alt: circle.name %>
   <% else %>
-    <%= image_tag "avatar/CirclesAvatar.png", class: "circle-avatar", alt: circle.name %>
+    <%= image_tag "avatar/CirclesAvatar.png", class: "ring-avatar ring-avatar-#{size}", style: "--ring: #{circle.border_color}", alt: circle.name %>
   <% end %>
 <% end %>

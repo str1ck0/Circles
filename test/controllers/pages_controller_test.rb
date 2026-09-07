@@ -23,7 +23,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     sign_in @visitor
     get root_path
     assert_response :success
-    assert_includes response.body, "DISCOVER"
+    assert_includes response.body, "Discover circles"
     assert_includes response.body, "Public Club"
     assert_not_includes response.body, "Secret Society"
     assert_not_includes response.body, "OPEN MIC"

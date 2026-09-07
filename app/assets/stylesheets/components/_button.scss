@@ -1,109 +1,129 @@
-.hover-underline-animation {
-  position: relative;
-  color: #FFFFFF;
+// Two button voices: accent (the one thing to do on a page) and ghost (everything else).
+
+%btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 11px 18px 9px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid transparent;
+  cursor: pointer;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+
+  &:active { transform: translateY(1px); }
+  &:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
-.hover-underline-animation:hover {
-  color: white;
+.btn-accent {
+  @extend %btn-base;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+
+  &:hover { background: #ffb13a; border-color: #ffb13a; color: var(--accent-ink); }
 }
 
-.hover-underline-animation::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background-color: #ff9d00;
-  transform-origin: bottom right;
-  transition: transform 0.25s ease-out;
+.btn-ghost {
+  @extend %btn-base;
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+
+  &:hover { border-color: var(--accent); color: var(--accent); }
 }
 
-.hover-underline-animation:hover::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
+.btn-quiet {
+  @extend %btn-base;
+  background: var(--surface-2);
+  color: var(--text);
+
+  &:hover { background: var(--surface-3); color: var(--text); }
+}
+
+.btn-sm {
+  padding: 8px 14px 6px;
+  font-size: 0.8rem;
+}
+
+.btn-block { width: 100%; }
+
+// Legacy class names still used on pages that haven't been rebuilt yet.
+.global-button-circle-show,
+.global-button-splitty,
+.event-add-circle-button,
+.container-form [type='submit'] {
+  @extend .btn-ghost;
+}
+
+// simple_form adds Bootstrap's `.btn`; keep our own voices in charge of the look.
+.btn.btn-accent { @extend .btn-accent; }
+.btn.btn-ghost { @extend .btn-ghost; }
+
+.global-button-circle-show.is-muted { color: var(--text-dim); }
+
+.global-button-chat {
+  @extend .btn-accent;
+  @extend .btn-sm;
+}
+
+.button-adding-friends {
+  @extend .btn-ghost;
+  @extend .btn-sm;
 }
 
 .global-button {
-  // background-color: #ff9d00;
-  background-color: transparent;
-  border: 2px solid #ff9d00;
-  color: white;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  transition: 0.3s ease;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  h5 { margin: 0; line-height: 1; font-size: 1.1rem; padding-top: 2px; }
+
+  &:hover { background: var(--accent); color: var(--accent-ink); }
 }
 
-.global-button:hover {
-  background-color: #ff9d00;
-}
+.hover-underline-animation {
+  position: relative;
+  color: var(--text);
+  text-decoration: none;
 
-.global-button-chat {
-    // background-color: #ff9d00;
-  background-color: transparent;
-  border: 2px solid #ff9d00;
-  color: white;
-  border-radius: 5px;
-  transition: 0.3s ease;
-}
+  &:hover { color: var(--text); }
 
-.global-button-chat:hover {
-  background-color: #ff9d00;
-}
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--accent);
+    transform-origin: bottom right;
+    transition: transform 0.25s ease-out;
+  }
 
-.global-button-splitty {
-  background-color: transparent;
-  border: 2px solid #ff9d00;
-  color: white;
-  border-radius: 5px;
-  transition: 0.3s ease;
-  padding: 10px;
-}
-
-.global-button-splitty:hover {
-  background-color: #ff9d00;
-}
-
-.global-button-circle-show {
-  background-color: transparent;
-  border: 2px solid #ff9d00;
-  color: white;
-  border-radius: 5px;
-  transition: 0.3s ease;
-  padding: 5px;
-  padding-right: 10px;
-  padding-left: 10px;
-  margin-right: 10px;
-  // margin-left: 5px;
-}
-
-.global-button-circle-show:hover {
-  background-color: #ff9d00;
-}
-
-
-
-#playlist-button {
-  width: 30px;
-  height: 30px;
-  margin-left: 20px;
-
-  h3 {
-    margin: 0;
+  &:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
   }
 }
 
-#add-friends-button {
-  padding: 3%;
-}
-
-#circle-show-create-event {
-  width: 60%;
-}
-
-.circle-show-header-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: 10%;
+// Bootstrap's btn-close is dark by default; we're on a dark ground.
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
 }

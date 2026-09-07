@@ -1,53 +1,154 @@
+// Event cards: portrait image, gradient scrim, title on top, meta chips.
+
 .cards-event {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 20px 40px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
   width: 100%;
 }
 
 .event-card {
-  height: 300px;
-  display: flex;
-  flex-direction: column;
-  p {
-    margin-bottom: 5px;
-    font-size: 10pt;
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  color: var(--text);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-2);
+    color: var(--text);
+
+    .event-card-image { transform: scale(1.04); }
   }
 }
 
-.attending {
-  display: flex;
-  flex-direction: row;
-  justify-content: left;
-  align-items: baseline;
-  gap: 10px;
+.event-card-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.4s ease;
 }
 
-.icons {
+.event-card-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(10, 10, 14, 0.55) 0%, rgba(10, 10, 14, 0) 35%),
+    linear-gradient(to top, rgba(10, 10, 14, 0.9) 0%, rgba(10, 10, 14, 0) 55%);
+}
+
+.event-card-top {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
   display: flex;
   justify-content: space-between;
-  margin-top: 5px;
-  color: white;
-  align-items: baseline;
+  align-items: center;
+  gap: 8px;
 }
 
-.image-icon-container{
-  position: relative;
-  padding: 5%;
-  padding-top: 3%;
-  border-radius: 5px;
-  height: 100%;
-  background-size: cover;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  // box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 40px;
-  // box-shadow: rgba(255, 255, 255, 0.2) 0px 2px 8px 0px;
-  img{
-    width: 100%;
+.event-card-bottom {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+}
+
+.event-card-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.15;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.event-card-meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px 4px;
+  border-radius: var(--r-pill);
+  background: rgba(17, 18, 23, 0.72);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  line-height: 1;
+
+  i { font-size: 0.7rem; }
+}
+
+.chip-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+// Circle cards (discover)
+.circle-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.circle-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+
+  &:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+}
+
+.circle-card-body {
+  flex: 1;
+  min-width: 0;
+
+  h3 {
+    font-size: 1rem;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
+  p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  form { margin: 10px 0 0; }
 }
 
-a:hover {
-  color:white;
-  text-decoration:none;
-  cursor:pointer;
+.empty-state {
+  padding: 40px 24px;
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--border-strong);
+  text-align: center;
+  color: var(--text-dim);
+
+  h3 { color: var(--text); font-size: 1.1rem; margin-bottom: 6px; }
+  p { margin: 0 0 16px; }
 }
