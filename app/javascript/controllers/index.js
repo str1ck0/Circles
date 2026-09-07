@@ -25,14 +25,8 @@ application.register("friend", FriendController)
 import GradientController from "./gradient_controller"
 application.register("gradient", GradientController)
 
-import HelloController from "./hello_controller"
-application.register("hello", HelloController)
-
 import MapController from "./map_controller"
 application.register("map", MapController)
-
-import NeweventController from "./newevent_controller"
-application.register("newevent", NeweventController)
 
 import RsvpController from "./rsvp_controller"
 application.register("rsvp", RsvpController)
@@ -42,9 +36,6 @@ application.register("search-users", SearchUsersController)
 
 import SliderController from "./slider_controller"
 application.register("slider", SliderController)
-
-import TitleController from "./title_controller"
-application.register("title", TitleController)
 
 import TomSelectController from "./tom_select_controller"
 application.register("tom-select", TomSelectController)

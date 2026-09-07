@@ -1,38 +1,38 @@
-<div class="dashboard-header" data-controller="newevent">
-  <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, :back %>
-  <div class="newevent-text"></div>
-</div>
+<% content_for :title, "New event" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">New event</p>
+      <h1>Plan something</h1>
+    </div>
+  </header>
 
-<%# Capital cities only! %>
-<% city_array = %w[Abu Dhabi Abuja Accra Addis Ababa Algiers Amman Amsterdam Andorra la Vella Ankara
-Antananarivo Apia Ashgaba Asmara Astana Asunción Athens Baghdad Baku Bamako Bandar-Seri-Begawan Bangkok
-Bangui Banjul Basseterre Beijing Beirut Belgrade Belmopan Berlin Bern Bishkek Bissau Bloemfontein Bogotá
-Brasilia Bratislava Brazzaville Bridgetown Brussels Bucharest Budapest Buenos Aires Cairo Canberra
-Cape-Town Caracas Castries Chisinau Conakry Copenhagen Dakar Damascus Dhaka Dili Djibouti Dodoma Doha
-Dublin Dushanbe Freetown Funafuti Gaborone Georgetown Gitega Guatemala-City Hanoi Harare Havana Helsinki Hamburg
-Honiara Islamabad Jakarta Jerusalem Jerusalem (East) Juba Kabul Kampala Kathmandu Khartoum Kigali Kingston
-Kingstown Kinshasa Kuala Lumpur Kuwait City Kyiv (also known as Kiev) La Paz  Libreville Lilongwe Lima
-Lisbon Ljubljana Lobamba Lomé London Luanda Lusaka Luxembourg  Madrid Majuro Malabo Male Managua Manama
-Manila Maputo Maseru Mbabane Mexico City Minsk Mogadishu Monaco Monrovia Montevideo Moroni Moscow Muscat
-Nairobi Nassau Naypyidaw N'Djamena New Delhi Ngerulmud Niamey Nicosia Nouakchott Nukuʻalofa Oslo Ottawa
-Ouagadougou Oyala Palikir Panama-City Paramaribo Paris Phnom-Penh Podgorica Port-Louis Port-Moresby
-Port-of-Spain Port-Vila Port-au-Prince Porto-Novo Prague Praia Pretoria Pristina Pyongyang Quito Rabat
-Reykjavik Riga Riyadh Rome Roseau Saint George's Saint-John's San-Jose San-Marino San-Salvador Sana'a
-Santiago Santo Domingo São Tomé Sarajevo Seoul Singapore Skopje Sofia Sri Jayawardenepura Kotte Stockholm
-Sucre  Suva Taipei Tallinn Tarawa Tashkent Tbilisi Tegucigalpa Tehran Thimphu Tirana Tokyo Tripoli Tunis
-Ulaanbaatar Vaduz Valletta Vatican City Victoria Vienna Vientiane Vilnius Warsaw Washington-D.C. Wellington
-Windhoek Yamoussoukro Yaounde Yaren District Yerevan Zagreb] %>
+  <div class="container-form container-form-page">
+    <%= simple_form_for @event do |f| %>
+      <%= f.error_notification %>
 
-<div class="container-form">
-  <h2>CREATE A NEW EVENT</h2>
-  <%= simple_form_for @event do |f| %>
-    <%= f.input :title %>
-    <%= f.input :location, collection: city_array , input_html: {data: {controller: 'tom-select'}}  %>
-    <%= f.input :private, as: :radio_buttons, collection: [['Yes',true], ['No',false]], required: true %>
-    <%= f.input :photos, as: :file , input_html: { multiple: true } %>
-    <%= f.input :start_date, as: :string, input_html: {data: { controller: "flatpicker"}} %>
-    <%= f.input :end_date, as: :string, input_html: {data: { controller: "flatpicker"}} %>
-    <%= f.association :circles, collection: current_user.circles.each {|circle| circle.name}, input_html: { class: 'multiselectuser'} %>
-    <%= f.submit %>
-  <% end %>
+      <%= f.input :title, placeholder: "Sunday braai, poker night, road trip…", autofocus: true %>
+      <%= f.input :location, placeholder: "City, venue or address", hint: "We'll put it on the map." %>
+
+      <div class="row g-2">
+        <div class="col-sm-6"><%= f.input :start_date, as: :string, label: "Starts", input_html: { data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
+        <div class="col-sm-6"><%= f.input :end_date, as: :string, label: "Ends", input_html: { data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
+      </div>
+
+      <%= f.input :photos, as: :file, label: "Photos", input_html: { multiple: true, accept: "image/*" }, hint: "The first one becomes the cover." %>
+
+      <% if current_user.circles.any? %>
+        <%= f.association :circles, as: :check_boxes, label: "Which circles is this for?", collection: current_user.circles.order(:name), item_wrapper_class: "form-check circle-choice", hint: "Everyone in those circles lands on the guest list as invited." %>
+      <% else %>
+        <p class="form-text">You're not in any circles yet — the event will just be yours until you add one.</p>
+      <% end %>
+
+      <%= f.input :private, as: :radio_buttons, label: "Who can see it?", collection: [["Everyone in those circles", false], ["Guest list only", true]], checked: false, item_wrapper_class: "form-check" %>
+
+      <div class="form-actions">
+        <%= f.button :submit, "Create event", class: "btn-accent" %>
+        <%= link_to "Cancel", root_path, class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </div>
 </div>

@@ -1,158 +1,132 @@
-<div class="dashboard-header" data-controller="title">
-  <%= link_to "<i class='fa-solid fa-arrow-left'></i>".html_safe, root_path %>
-  <div class="dashboard-text"></div>
-</div>
-<div class="dashboard-main-container">
-  <div class="dashboard-left-side">
-    <div class="dashboard-profile">
-      <%= image_tag @user.photo if @user.photo.attached? %>
-      <div class="dashboard-profile-info">
-        <div class="dashboard-profile-info-left-block">
-        <h2><%= @user.full_name %></h2>
-        <p>Joined <%= @user.created_at.strftime("%b %Y") %></p>
-        </div>
-        <%= link_to user_path(@user), title: "Your profile" do %>
-          <p><i class='fa-solid fa-user'></i></p>
-        <% end %>
-        <%= link_to edit_user_registration_path, title: "Edit profile" do %>
-          <p><i class='fa-solid fa-pen'></i></p>
-        <% end %>
-      </div>
+<% content_for :title, "Dashboard" %>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Dashboard</p>
+      <h1>Hey <%= current_user.first_name %></h1>
     </div>
-    <div class="dashboard-orbits">
-      <div class="dashboard-orbit-header">
-        <h4>PEOPLE</h4>
-      </div>
-      <div class="dashboard-orbits-body">
-        <div id="circle-orbit-container">
-          <div class="middle-orbit-cirlces-4">
-            <%= image_tag @user.photo if @user.photo.attached? %>
-          </div>
-          <div id="middle-orbit">
-            <% @orbit_users.each_with_index do |person, index| %>
-              <div class="<%= index.zero? ? 'middle-orbit-cirlces' : "middle-orbit-cirlces-#{index + 1}" %>">
-                <%= link_to user_path(person), title: person.full_name do %>
-                  <%= image_tag person.photo if person.photo.attached? %>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      </div>
+    <div class="page-actions">
+      <%= link_to user_path(current_user), class: "btn-ghost btn-sm" do %><i class="fa-regular fa-user"></i> View profile<% end %>
+      <%= link_to edit_user_registration_path, class: "btn-ghost btn-sm" do %><i class="fa-solid fa-pen"></i> Edit profile<% end %>
     </div>
-  </div>
-    <div class="dashboard-right-side">
-    <div class="dashboard-discover-events">
-      <h5>DISCOVER</h5>
-      <div class="dashboard-discover-carousel">
-        <section class="splide splide-content" aria-label="Events you can see" data-controller="slider">
-          <div class="splide__track">
-            <ul class="splide__list">
-              <% @discover_events.select { |event| event.photos.attached? }.each do |event| %>
-                <li class="splide__slide"><%= link_to image_tag(event.photos.first), event_path(event) %></li>
-              <% end %>
-            </ul>
-          </div>
-        </section>
-      </div>
-    </div>
-    <div class="dashboard-right-top">
-    </div>
-    <div class="dashboard-invitations">
-      <h5>INVITES</h5>
-      <div class="dashboard-invitations-section">
-        <% if @pending_invitations.any? %>
-          <% @pending_invitations.each do |invitation| %>
-            <div class="dashboard-invitations-info">
-              <p><%= invitation.inviter.first_name %> invited you to <strong><%= invitation.circle.name %></strong></p>
-              <div class="dashboard-invitations-info-buttons d-flex">
-                <%= button_to "Accept", accept_invitation_path(invitation), method: :post, class: "btn global-button-circle-show" %>
-                <%= button_to "Decline", decline_invitation_path(invitation), method: :post, class: "btn global-button-circle-show is-muted" %>
-              </div>
-            </div>
-          <% end %>
-        <% else %>
-          <div class="dashboard-invitations-info">
-            <p>No pending invites.</p>
-            <% if @user == current_user %>
-              <%= link_to "Notifications", notifications_path, class: "hover-underline-animation" %>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  </div>
-  <div class="dashboard-middle">
-    <div class="dashboard-middle-top">
-      <div class="dashboard-next-event">
-        <h5>NEXT EVENTS</h5>
-        <% if @next_event %>
-          <%= link_to event_path(@next_event) do %>
-            <div class="dashboard-next-event-info">
-              <p style="margin-top: 5px"><strong><%= @next_event.title %></strong></p>
-              <p><%= @next_event.start_date.strftime("%a, %b %d") %></p>
-            </div>
-          <% end %>
-        <% else %>
-          <div class="dashboard-next-event-info">
-            <p>No upcoming events...</p>
-          </div>
-        <% end %>
-      </div>
-      <div class="dashboard-circles">
-        <h5><%= @user == current_user ? "YOUR CIRCLES" : "CIRCLES" %></h5>
-        <div class="dash-circle-grid">
-          <% @circles.each do |circle| %>
-            <%= render "shared/circle_avatar", circle: circle %>
-          <% end %>
-        </div>
-      </div>
-    </div>
-    <div class="dashboard-middle-bottom">
-      <div class="dashboard-show-spotify-playlists">
-        <div class="spotify-playlists-header">
-          <h5><%= @user == current_user ? "YOUR PLAYLISTS" : "PLAYLISTS" %></h5>
-          <% if @circle && policy(@circle).add_playlist? %>
-            <!-- Playlist Button trigger modal -->
-            <button type="button" class="global-button" id="playlist-button" data-bs-toggle="modal" data-bs-target="#addPlaylist">
-              <h5>+</h5>
-            </button>
-          <% end %>
-        </div>
-        <div class="playlists-grid">
-          <% if @circle %>
-            <% @circle.circle_playlists.each do |playlist| %>
-              <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/<%=playlist.embed_url%>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-            <% end %>
-          <% else %>
-            <p>Join a circle to see its playlists.</p>
-          <% end %>
-        </div>
+  </header>
 
-        <% if @circle && policy(@circle).add_playlist? %>
-          <!-- Modal -->
-          <div class="modal fade" id="addPlaylist" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddPlaylistLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-              <div class="modal-content modal-content-circle-show">
-                <div class="modal-header">
-                  <i class="fa-brands fa-spotify"></i>
-                  <h1 class="modal-title fs-5" id="AddPlaylistLabel">Add a Playlist</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body modal-body-content">
-                  <%= simple_form_for [@circle, @circle_playlist] do |f| %>
-                    <%= f.input :url, label: 'Enter the link to your playlist' %>
-                    <%= f.submit "Add" %>
-                  <% end %>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
+  <div class="dash-grid">
+    <section class="dash-card">
+      <h2 class="section-title">Next up</h2>
+      <% if @next_event %>
+        <div class="dash-next">
+          <%= render "shared/event_card", event: @next_event %>
+          <div class="dash-next-text">
+            <p class="eyebrow"><%= @next_event.start_date.strftime("%A, %-d %B") %></p>
+            <p class="dash-next-rsvp">
+              <% case @next_rsvp&.status
+                 when "going" %><i class="fa-solid fa-check"></i> You're going
+              <% when "maybe" %><i class="fa-regular fa-circle-question"></i> You said maybe
+              <% when "declined" %><i class="fa-solid fa-xmark"></i> You can't make it
+              <% else %><i class="fa-regular fa-envelope"></i> You're invited — RSVP on the event
+              <% end %>
+            </p>
+            <% if @upcoming_events.size > 1 %>
+              <p class="text-dim"><%= pluralize(@upcoming_events.size - 1, "more event") %> coming up.</p>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="empty-state empty-state-compact">
+          <h3>Nothing on the calendar</h3>
+          <p>Plan something for one of your circles.</p>
+          <%= link_to "New event", new_event_path, class: "btn-ghost btn-sm" %>
+        </div>
+      <% end %>
+    </section>
+
+    <section class="dash-card">
+      <h2 class="section-title">
+        Invites
+        <% if @pending_invitations.any? %><span class="unread-badge"><%= @pending_invitations.size %></span><% end %>
+      </h2>
+      <% if @pending_invitations.any? %>
+        <% @pending_invitations.each do |invitation| %>
+          <div class="invitation-card">
+            <%= user_avatar invitation.inviter, class: "ring-avatar ring-avatar-sm" %>
+            <p><strong><%= invitation.inviter.first_name %></strong> invited you to <strong><%= invitation.circle.name %></strong></p>
+            <div class="invitation-actions">
+              <%= button_to "Accept", accept_invitation_path(invitation), method: :post, class: "btn-accent btn-sm" %>
+              <%= button_to "Decline", decline_invitation_path(invitation), method: :post, class: "btn-ghost btn-sm" %>
             </div>
           </div>
         <% end %>
-      </div>
-    </div>
+      <% else %>
+        <p class="text-dim">No pending invites.</p>
+      <% end %>
+      <%= link_to notifications_path, class: "dash-link" do %>
+        All notifications<% if unread_notifications_count.positive? %> · <%= unread_notifications_count %> unread<% end %> <i class="fa-solid fa-arrow-right"></i>
+      <% end %>
+    </section>
+
+    <section class="dash-card dash-wide">
+      <h2 class="section-title">
+        Your circles
+        <%= link_to new_circle_path, class: "section-title-action", title: "New circle" do %><i class="fa-solid fa-plus"></i><% end %>
+      </h2>
+      <% if @circles.any? %>
+        <div class="circle-cards">
+          <% @circles.each do |circle| %>
+            <%= render "shared/circle_card", circle: circle %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="empty-state empty-state-compact">
+          <h3>No circles yet</h3>
+          <p>Start one for your crew, or join an open circle from the home page.</p>
+          <%= link_to "New circle", new_circle_path, class: "btn-accent btn-sm" %>
+        </div>
+      <% end %>
+    </section>
+
+    <section class="dash-card">
+      <h2 class="section-title">People</h2>
+      <% if @friends.any? %>
+        <div class="people-grid">
+          <% @friends.each do |person| %>
+            <%= link_to user_path(person), class: "people-grid-item", title: person.full_name do %>
+              <%= user_avatar person, class: "ring-avatar ring-avatar-md" %>
+              <span><%= person.first_name %></span>
+            <% end %>
+          <% end %>
+        </div>
+        <%= link_to users_path, class: "dash-link" do %>Find more people <i class="fa-solid fa-arrow-right"></i><% end %>
+      <% else %>
+        <p class="text-dim">Your circle-mates will show up here.</p>
+      <% end %>
+    </section>
+
+    <section class="dash-card">
+      <h2 class="section-title">Playlists</h2>
+      <% if @playlists.any? %>
+        <div class="playlists-grid playlists-grid-compact">
+          <% @playlists.each do |playlist| %>
+            <div>
+              <p class="playlist-source"><%= link_to playlist.circle.name, circle_path(playlist.circle) %></p>
+              <iframe title="Spotify playlist" src="https://open.spotify.com/embed/playlist/<%= playlist.embed_url %>?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-dim">Join a circle to see its playlists.</p>
+      <% end %>
+    </section>
+
+    <% if @discover_events.any? %>
+      <section class="dash-card dash-wide">
+        <h2 class="section-title">Discover events</h2>
+        <div class="cards-event">
+          <% @discover_events.each do |event| %>
+            <%= render "shared/event_card", event: event %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
   </div>
 </div>

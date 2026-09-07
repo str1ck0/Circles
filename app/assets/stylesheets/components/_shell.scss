@@ -195,13 +195,3 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-
-// --- Compatibility for the dashboard until it's rebuilt (5d) -----------------
-// It was laid out against the viewport; inside the shell it needs to size to the main
-// column instead.
-.app-main .dashboard-main-container {
-  width: auto;
-  max-width: var(--content-max);
-  padding-left: var(--gutter);
-  padding-right: var(--gutter);
-}

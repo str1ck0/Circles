@@ -1,6 +1,13 @@
-<div class="container-form">
-  <h2>EDIT PROFILE</h2>
+<% content_for :title, "Edit profile" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Settings</p>
+      <h1>Edit profile</h1>
+    </div>
+  </header>
 
+<div class="container-form container-form-page">
   <%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
     <%= f.error_notification %>
 
@@ -30,17 +37,14 @@
     </div>
 
     <div class="form-actions">
-      <%= f.button :submit, "Update" %>
+      <%= f.button :submit, "Save changes", class: "btn-accent" %>
+      <%= link_to "Back to your profile", user_path(resource), class: "btn-ghost" %>
     </div>
   <% end %>
 
-  <div class="mt-4">
-    <%= link_to "Back to your profile", user_path(resource) %>
+  <div class="danger-zone">
+    <p class="eyebrow">Danger zone</p>
+    <%= button_to "Delete my account", registration_path(resource_name), form: { data: { turbo_confirm: "Delete your account? This can't be undone." } }, method: :delete, class: "btn-quiet btn-sm" %>
   </div>
-
-  <h3 class="mt-5">Cancel my account</h3>
-  <div class="d-flex align-items-center">
-    <div>Unhappy?</div>
-    <%= button_to "Cancel my account", registration_path(resource_name), data: { turbo_confirm: "Are you sure?" }, method: :delete, class: "btn btn-link" %>
-  </div>
+</div>
 </div>

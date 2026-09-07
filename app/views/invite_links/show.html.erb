@@ -1,18 +1,19 @@
+<% content_for :title, "Join #{@circle.name}" %>
 <div class="invite-landing">
-  <p class="invite-landing-eyebrow"><%= @invitation.inviter.full_name %> invited you to join</p>
+  <p class="eyebrow"><%= @invitation.inviter.full_name %> invited you to join</p>
   <% if @circle.photo.attached? %>
-    <%= image_tag @circle.photo, class: "invite-landing-avatar", style: "border-color: #{@circle.border_color}", alt: @circle.name %>
+    <%= image_tag @circle.photo, class: "ring-avatar ring-avatar-xl mx-auto", style: "--ring: #{@circle.border_color}", alt: @circle.name %>
   <% end %>
   <h1><%= @circle.name %></h1>
   <p class="invite-landing-meta">
-    <i class="fa-solid fa-user-group"></i> <%= @circle.users.size %> members ·
-    <%= @circle.private? ? "Private" : "Public" %> circle
+    <i class="fa-solid fa-user-group"></i> <%= pluralize(@circle.users.size, "member") %> ·
+    <%= @circle.private? ? "Private" : "Open" %> circle
   </p>
 
   <% if @already_member %>
-    <p>You're already a member.</p>
-    <%= link_to "Open the circle", circle_path(@circle), class: "btn global-button-circle-show" %>
+    <p class="text-dim">You're already a member.</p>
+    <%= link_to "Open the circle", circle_path(@circle), class: "btn-ghost" %>
   <% else %>
-    <%= button_to "Join #{@circle.name}", accept_invite_link_path(@invitation.token), method: :post, class: "btn global-button-circle-show" %>
+    <%= button_to "Join #{@circle.name}", accept_invite_link_path(@invitation.token), method: :post, class: "btn-accent" %>
   <% end %>
 </div>
