@@ -175,7 +175,7 @@
     <div class="event-right-side-host">
       <h5>HOSTED BY</h5>
       <div class="event-right-side-host-card">
-        <%= link_to dashboard_path(@event.user) do %>
+        <%= link_to user_path(@event.user) do %>
           <div class="event-right-side-host-body">
             <%= user_avatar @event.user %>
             <div class="event-right-side-host-info">
@@ -235,8 +235,11 @@
             <p class="guest-list-heading"><%= heading %> · <%= guests.size %></p>
             <ul>
               <% guests.each do |user_event| %>
-                <li><%= user_avatar user_event.user %>
+                <li>
+                  <%= link_to user_path(user_event.user), class: "d-flex align-items-center" do %>
+                    <%= user_avatar user_event.user %>
                     <p><%= user_event.user.full_name %></p>
+                  <% end %>
                 </li>
               <% end %>
             </ul>

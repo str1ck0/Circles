@@ -1,3 +1,4 @@
 class UserPolicy < ApplicationPolicy
-  def show? = user.present?
+  def index? = user.present?
+  def show?  = user.present?
 end

@@ -1,0 +1,142 @@
+.profile-page,
+.people-page {
+  width: 92vw;
+  max-width: 900px;
+  margin: 40px auto 60px;
+  color: white;
+}
+
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 8px;
+  background-color: #202124;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.profile-back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  color: white;
+  font-size: 20px;
+}
+
+.profile-header {
+  padding-left: 56px;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ff9d00;
+  flex-shrink: 0;
+}
+
+.profile-identity {
+  flex: 1;
+  min-width: 0;
+
+  h1 {
+    margin: 0 0 2px;
+    font-size: 28px;
+  }
+}
+
+.profile-handle {
+  margin: 0;
+  opacity: 0.7;
+}
+
+.profile-meta {
+  margin: 6px 0 10px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.profile-bio {
+  margin: 0 0 14px;
+  max-width: 60ch;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-section {
+  margin-bottom: 32px;
+
+  h5 {
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    margin-bottom: 12px;
+  }
+
+  .cards-event {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}
+
+.profile-circle-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.profile-empty,
+.person-handle {
+  opacity: 0.7;
+}
+
+.people-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .form-control {
+    flex: 1;
+    background-color: #2c2d31;
+    color: white;
+    border: 1px solid #444;
+  }
+}
+
+.person-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: #202124;
+  margin-bottom: 8px;
+  color: white;
+  text-decoration: none;
+
+  img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  p { margin: 0; }
+
+  &:hover {
+    background-color: #2c2d31;
+    color: white;
+  }
+}
+
+.person-name {
+  font-weight: 600;
+}

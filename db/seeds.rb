@@ -53,7 +53,8 @@ User.destroy_all
 puts "> Creating the main character..."
 main_user = User.create!(
   email: "benten@gmail.com", password: "password",
-  username: "benten", first_name: "Liam", last_name: "Strickland"
+  username: "benten", first_name: "Liam", last_name: "Strickland",
+  bio: "Builder of Circles. Surf, football, and a good braai."
 )
 attach_image(main_user, :photo, avatar_url(0))
 
@@ -66,7 +67,8 @@ users = [main_user]
     password: "password",
     username: Faker::Internet.unique.username(specifier: 5..12),
     first_name: male ? Faker::Name.male_first_name : Faker::Name.female_first_name,
-    last_name: Faker::Name.last_name
+    last_name: Faker::Name.last_name,
+    bio: [Faker::Hipster.sentence(word_count: 6), nil, Faker::Hipster.sentence(word_count: 9)].sample
   )
   attach_image(user, :photo, avatar_url(i + 1))
   users << user

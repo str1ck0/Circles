@@ -11,10 +11,11 @@
         <h2><%= @user.full_name %></h2>
         <p>Joined <%= @user.created_at.strftime("%b %Y") %></p>
         </div>
-        <% if @user == current_user %>
-          <%= link_to edit_user_registration_path do %>
-            <p><i class='fa-solid fa-pen'></i></p>
-          <% end %>
+        <%= link_to user_path(@user), title: "Your profile" do %>
+          <p><i class='fa-solid fa-user'></i></p>
+        <% end %>
+        <%= link_to edit_user_registration_path, title: "Edit profile" do %>
+          <p><i class='fa-solid fa-pen'></i></p>
         <% end %>
       </div>
     </div>
@@ -30,7 +31,7 @@
           <div id="middle-orbit">
             <% @orbit_users.each_with_index do |person, index| %>
               <div class="<%= index.zero? ? 'middle-orbit-cirlces' : "middle-orbit-cirlces-#{index + 1}" %>">
-                <%= link_to dashboard_path(person), title: person.full_name do %>
+                <%= link_to user_path(person), title: person.full_name do %>
                   <%= image_tag person.photo if person.photo.attached? %>
                 <% end %>
               </div>

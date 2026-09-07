@@ -30,8 +30,6 @@ Rails.application.routes.draw do
   end
 
   resources :notifications, only: %i[index show]
-
-  get "profile", to: "users#profile"
-
+  resources :users, only: %i[index show]
   resources :dashboard, only: :show
 end

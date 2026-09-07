@@ -18,9 +18,18 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  scope :search, lambda { |query|
+    pattern = "%#{sanitize_sql_like(query.to_s.strip)}%"
+    where("first_name ILIKE :q OR last_name ILIKE :q OR username ILIKE :q OR CONCAT(first_name, ' ', last_name) ILIKE :q", q: pattern)
+  }
+
   # Everyone who shares at least one circle with this user (excluding self).
   def friends
     User.where(id: UserCircle.where(circle_id: circle_ids).where.not(user_id: id).select(:user_id))
+  end
+
+  def handle
+    username.present? ? "@#{username}" : nil
   end
 
   def full_name
