@@ -1,18 +1,17 @@
 <div data-search-users-target="users_list">
-  <div class="users">
+  <ul class="invite-list">
     <% users.each do |user| %>
-      <div class="circle-add-friend"
-        data-controller="friend"
-        data-friend-user-id-value="<%= user.id %>"
-        data-friend-circle-id-value="<%= circle.id %>">
-        <div class="circle-img-add-friend">
-          <%= user_avatar user %>
-        </div>
-        <div class="circle-add-friend-info">
-          <p><%= user.full_name %></p>
-          <p><%= button_tag "Invite", class: "button-adding-friends", data: { action: "friend#submit", "friend-target" => "button" } %></p>
-        </div>
-      </div>
+      <li class="invite-row"
+          data-controller="friend"
+          data-friend-user-id-value="<%= user.id %>"
+          data-friend-circle-id-value="<%= circle.id %>">
+        <%= user_avatar user, class: "ring-avatar ring-avatar-xs" %>
+        <span class="invite-row-name"><%= user.full_name %></span>
+        <%= button_tag "Invite", type: "button", class: "btn-ghost btn-sm", data: { action: "friend#submit", "friend-target" => "button" } %>
+      </li>
     <% end %>
-  </div>
+    <% if users.empty? %>
+      <li class="text-dim">Nobody left to invite.</li>
+    <% end %>
+  </ul>
 </div>
