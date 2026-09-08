@@ -94,6 +94,11 @@
   padding-bottom: 6px;
 
   .eyebrow { text-align: right; }
+
+  @media (max-width: 767.98px) {
+    width: 100%;
+    .eyebrow { text-align: left; }
+  }
 }
 
 .rsvp-group {
