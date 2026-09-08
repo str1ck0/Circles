@@ -45,13 +45,28 @@
 .chat-form {
   display: flex;
   gap: 8px;
-  align-items: flex-end;
+  align-items: center;
   padding: 10px 12px 12px;
   border-top: 1px solid var(--border);
   background: var(--bg-elevated);
 
   .form-group, .form-control { margin-bottom: 0; }
-  textarea.form-control { min-height: 42px; resize: none; }
+
+  textarea.form-control {
+    height: 44px;
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    resize: none;
+    line-height: 1.4;
+  }
+
+  .btn-accent {
+    height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
 }
 
 .chat-panel-locked {
