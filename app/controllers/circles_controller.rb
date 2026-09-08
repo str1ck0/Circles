@@ -11,7 +11,9 @@ class CirclesController < ApplicationController
     authorize @circle
     if @circle.save
       @circle.users << current_user unless @circle.users.include?(current_user)
-      redirect_to @circle, notice: "New Circle created!"
+      invited = invite_initial_members
+      notice = invited.positive? ? "Circle created — #{helpers.pluralize(invited, 'invite')} sent." : "Circle created!"
+      redirect_to @circle, notice: notice
     else
       @colors = colors
       render :new, status: :unprocessable_entity
@@ -46,7 +48,19 @@ class CirclesController < ApplicationController
     %w[#33a8c7 #52e3e1 #a0e426 #fdf148 #ffab00 #f77976 #f050ae #d883ff #9336fd #ffbe0b #fb5607 #ff006e #8338ec #3a86ff]
   end
 
+  # People picked on the form get an invitation to accept, never a silent membership.
+  def invite_initial_members
+    ids = Array(params.dig(:circle, :invitee_ids)).reject(&:blank?)
+    User.where(id: ids).where.not(id: current_user.id).count do |user|
+      invitation = @circle.invitations.create(inviter: current_user, invitee: user)
+      next false unless invitation.persisted?
+
+      Notification.notify(recipient: user, actor: current_user, notifiable: invitation, kind: :circle_invitation)
+      true
+    end
+  end
+
   def circle_params
-    params.require(:circle).permit(:name, :photo, :private, :border_color, :banner, user_ids: [])
+    params.require(:circle).permit(:name, :photo, :private, :border_color, :banner)
   end
 end

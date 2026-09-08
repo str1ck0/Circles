@@ -24,9 +24,10 @@
 
       <%= f.input :private, as: :radio_buttons, label: "Who can join?", collection: [["Anyone — an open club", false], ["Invite only", true]], checked: true, item_wrapper_class: "form-check", hint: "Open circles show up on everyone's home page." %>
 
-      <%= f.association :users, label: "Add people now (optional)", collection: User.where.not(id: current_user.id).order(:first_name), label_method: :full_name,
-                        input_html: { multiple: true, data: { controller: "tom-select" }, placeholder: "Start typing a name" },
-                        hint: "You can also invite people or share a link once the circle exists." %>
+      <%= f.input :invitee_ids, as: :select, label: "Invite people now (optional)",
+                  collection: User.where.not(id: current_user.id).order(:first_name), label_method: :full_name, value_method: :id,
+                  input_html: { multiple: true, name: "circle[invitee_ids][]", data: { controller: "tom-select" }, placeholder: "Start typing a name" },
+                  hint: "Anyone on Circles. They'll get an invite to accept — or share a link once the circle exists." %>
 
       <div class="form-actions">
         <%= f.button :submit, "Create circle", class: "btn-accent" %>

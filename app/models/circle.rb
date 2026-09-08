@@ -10,6 +10,9 @@ class Circle < ApplicationRecord
   has_one_attached :banner
   has_many :circle_playlists, dependent: :destroy
 
+  # Form-only: people picked on the "new circle" form, turned into invitations by the controller.
+  attr_accessor :invitee_ids
+
   validates :name, presence: true
   validates :photo, presence: true
   validates :banner, presence: true

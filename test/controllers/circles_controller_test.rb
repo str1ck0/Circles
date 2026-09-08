@@ -47,6 +47,29 @@ class CirclesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the new circle form renders with the invite picker" do
+    sign_in @stranger
+    get new_circle_path
+    assert_response :success
+    assert_includes response.body, "Invite people now"
+  end
+
+  test "people picked when creating a circle get invites, not memberships" do
+    sign_in @stranger
+    assert_difference ["Circle.count", "Invitation.count", "Notification.count"], 1 do
+      post circles_path, params: { circle: {
+        name: "Book Club", private: true, border_color: "#ff9d00",
+        photo: fixture_file_upload("avatar.png", "image/png"), banner: fixture_file_upload("avatar.png", "image/png"),
+        invitee_ids: [@member.id, @stranger.id]
+      } }
+    end
+    circle = Circle.order(:id).last
+    assert_redirected_to circle_path(circle)
+    assert_equal [@stranger], circle.users.to_a
+    assert_equal @member, circle.invitations.first.invitee
+    assert @member.notifications.last.circle_invitation?
+  end
+
   test "signed-out visitors are sent to log in" do
     get circle_path(@public_circle)
     assert_redirected_to new_user_session_path
