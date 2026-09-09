@@ -150,7 +150,10 @@ orbit/ring motif, the dark ground and the orange accent.
 - ~~Event editing UI and deletion~~ ✅ — shared `events/_form` partial for new/edit, host-only
   edit button in the hero, delete in a danger zone. `UserEvent`/`Payment` now cascade to
   `payments`/`splittees` so deleting an event doesn't orphan Splitty rows.
-- Leave a circle / remove a member; transfer ownership.
+- ~~Leave a circle / remove a member~~ ✅ — members leave from the circle hero, the owner
+  removes others from the members list, and the last member out takes the empty circle
+  with them. The owner can't leave (they delete instead) — **transferring ownership is
+  still open**, and would be the natural way to let an owner hand over and leave.
 - Pagination for chat history and the people directory.
 - System tests for the chat and RSVP flows (Capybara is already in the Gemfile).
 

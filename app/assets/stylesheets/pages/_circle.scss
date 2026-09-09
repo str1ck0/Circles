@@ -186,7 +186,16 @@
   overflow-y: auto;
   scrollbar-width: thin;
 
+  li {
+    display: flex;
+    align-items: center;
+
+    form { margin: 0; }
+  }
+
   li a {
+    flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -197,6 +206,23 @@
 
     &:hover { background: var(--surface-2); color: var(--text); }
   }
+}
+
+.member-remove {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover { background: var(--surface-2); color: var(--danger); }
 }
 
 .member-badge {

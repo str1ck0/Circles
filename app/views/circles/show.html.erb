@@ -18,7 +18,7 @@
       <div class="circle-hero-text">
         <h1><%= @circle.name %></h1>
         <p class="circle-hero-meta">
-          <span><i class="fa-solid fa-user-group"></i> <%= pluralize(@members.size, "member") %></span>
+          <span><i class="fa-solid fa-user-group"></i> <%= pluralize(@memberships.size, "member") %></span>
           <span><i class="fa-solid <%= @circle.private? ? 'fa-lock' : 'fa-unlock' %>"></i> <%= @circle.private? ? "Private" : "Open to everyone" %></span>
           <span>Started <%= @circle.created_at.strftime("%b %Y") %></span>
         </p>
@@ -32,6 +32,10 @@
         <% end %>
         <% if circle_policy.create_event? %>
           <%= link_to new_event_path, class: "btn-accent" do %><i class="fa-regular fa-calendar-plus"></i> Create event<% end %>
+        <% end %>
+        <% if circle_policy.leave? %>
+          <%= button_to circle_user_circle_path(@circle, @circle.user_circles.find_by(user: current_user)), method: :delete, class: "btn-quiet btn-sm",
+                        form: { data: { turbo_confirm: "Leave #{@circle.name}?" } } do %><i class="fa-solid fa-arrow-right-from-bracket"></i> Leave<% end %>
         <% end %>
         <% if circle_policy.destroy? %>
           <%= button_to circle_path(@circle), method: :delete, class: "btn-quiet btn-sm", form: { data: { turbo_confirm: "Delete #{@circle.name}? This can't be undone." } } do %><i class="fa-regular fa-trash-can"></i> Delete<% end %>
@@ -135,15 +139,23 @@
       <div class="members-panel">
         <div class="chat-panel-header">
           <h2>Members</h2>
-          <span class="text-faint"><%= @members.size %></span>
+          <span class="text-faint"><%= @memberships.size %></span>
         </div>
         <ul class="members-list">
-          <% @members.each do |member| %>
+          <% @memberships.each do |membership| %>
+            <% member = membership.user %>
             <li>
               <%= link_to user_path(member) do %>
                 <%= user_avatar member, class: "ring-avatar ring-avatar-xs" %>
                 <span><%= member.full_name %></span>
                 <% if member == @circle.owner %><span class="member-badge">Owner</span><% end %>
+              <% end %>
+              <% if circle_policy.remove_member? && member != @circle.owner %>
+                <%= button_to circle_user_circle_path(@circle, membership), method: :delete, class: "member-remove",
+                              form: { data: { turbo_confirm: "Remove #{member.first_name} from #{@circle.name}?" } },
+                              aria: { label: "Remove #{member.full_name}" }, title: "Remove #{member.first_name}" do %>
+                  <i class="fa-solid fa-xmark"></i>
+                <% end %>
               <% end %>
             </li>
           <% end %>

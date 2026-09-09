@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   root to: "pages#home"
 
   resources :circles, only: %i[new create destroy show] do
-    resources :user_circles, only: %i[create]
+    resources :user_circles, only: %i[create destroy]
     resources :circle_messages, only: %i[create]
     resources :events, only: %i[new create]
     resources :users, only: :index

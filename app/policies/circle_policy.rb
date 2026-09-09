@@ -12,6 +12,9 @@ class CirclePolicy < ApplicationPolicy
   def create?        = user.present?
   def destroy?       = owner?
   def join?          = user.present? && record.public? && !member?
+  # The owner can't walk away from a circle they'd leave ownerless — they delete it instead.
+  def leave?         = member? && !owner?
+  def remove_member? = owner?
   def invite?        = member?
   def chat?          = member?
   def add_playlist?  = member?
