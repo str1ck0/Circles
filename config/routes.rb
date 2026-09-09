@@ -21,7 +21,7 @@ Rails.application.routes.draw do
   get  "invites/:token", to: "invite_links#show",   as: :invite_link
   post "invites/:token", to: "invite_links#accept", as: :accept_invite_link
 
-  resources :events, only: %i[new create update show] do
+  resources :events, only: %i[new create edit update destroy show] do
     resources :user_events, only: %i[create]
     resources :event_messages, only: %i[create]
     resources :circle_events, only: %i[create]

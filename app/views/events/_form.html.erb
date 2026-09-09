@@ -1,0 +1,29 @@
+<%= simple_form_for event do |f| %>
+  <%= f.error_notification %>
+
+  <%= f.input :title, placeholder: "Sunday braai, poker night, road trip…", autofocus: true %>
+  <%= f.input :location, placeholder: "City, venue or address", hint: "We'll put it on the map." %>
+
+  <div class="row g-2">
+    <div class="col-sm-6"><%= f.input :start_date, as: :string, label: "Starts", input_html: { value: event.start_date&.strftime("%Y-%m-%d %H:%M"), data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
+    <div class="col-sm-6"><%= f.input :end_date, as: :string, label: "Ends", input_html: { value: event.end_date&.strftime("%Y-%m-%d %H:%M"), data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
+  </div>
+
+  <%= f.input :photos, as: :file, label: "Photos", input_html: { multiple: true, accept: "image/*" },
+              hint: event.persisted? ? "Choosing photos replaces the current ones. Leave empty to keep them." : "The first one becomes the cover." %>
+
+  <% unless event.persisted? %>
+    <% if current_user.circles.any? %>
+      <%= f.association :circles, as: :check_boxes, label: "Which circles is this for?", collection: current_user.circles.order(:name), item_wrapper_class: "form-check circle-choice", hint: "Everyone in those circles lands on the guest list as invited." %>
+    <% else %>
+      <p class="form-text">You're not in any circles yet — the event will just be yours until you add one.</p>
+    <% end %>
+  <% end %>
+
+  <%= f.input :private, as: :radio_buttons, label: "Who can see it?", collection: [["Everyone in those circles", false], ["Guest list only", true]], item_wrapper_class: "form-check" %>
+
+  <div class="form-actions">
+    <%= f.button :submit, submit_label, class: "btn-accent" %>
+    <%= link_to "Cancel", cancel_path, class: "btn-ghost" %>
+  </div>
+<% end %>

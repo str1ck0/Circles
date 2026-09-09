@@ -147,7 +147,9 @@ orbit/ring motif, the dark ground and the orange accent.
 
 ## What's next (ideas, not commitments)
 
-- Event editing UI (the `update` action exists; there's no form yet) and event deletion.
+- ~~Event editing UI and deletion~~ ✅ — shared `events/_form` partial for new/edit, host-only
+  edit button in the hero, delete in a danger zone. `UserEvent`/`Payment` now cascade to
+  `payments`/`splittees` so deleting an event doesn't orphan Splitty rows.
 - Leave a circle / remove a member; transfer ownership.
 - Pagination for chat history and the people directory.
 - System tests for the chat and RSVP flows (Capybara is already in the Gemfile).

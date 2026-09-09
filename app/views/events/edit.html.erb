@@ -1,0 +1,20 @@
+<% content_for :title, "Edit #{@event.title}" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Edit event</p>
+      <h1><%= @event.title %></h1>
+    </div>
+  </header>
+
+  <div class="container-form container-form-page">
+    <%= render "form", event: @event, submit_label: "Save changes", cancel_path: event_path(@event) %>
+
+    <div class="danger-zone">
+      <p class="eyebrow">Danger zone</p>
+      <p class="text-dim">Deleting the event removes its chat, guest list and Splitty balances for everyone.</p>
+      <%= button_to "Delete event", event_path(@event), method: :delete, class: "btn-quiet btn-sm",
+                    form: { data: { turbo_confirm: "Delete #{@event.title}? This can't be undone." } } %>
+    </div>
+  </div>
+</div>

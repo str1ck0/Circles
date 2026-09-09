@@ -17,6 +17,7 @@ class EventPolicy < ApplicationPolicy
   def show?           = attendee? || (record.public? && circle_member?)
   def create?         = user.present?
   def update?         = host?
+  def destroy?        = host?
   def rsvp?           = show?
   def chat?           = attendee?
   def add_playlist?   = attendee?

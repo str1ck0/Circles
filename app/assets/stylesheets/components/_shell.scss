@@ -96,13 +96,28 @@
   .unread-badge { margin-left: auto; }
 }
 
+// The buttons sit in the nav column, so their icons and labels share the nav's rail
+// rather than centring inside the pill.
 .sidebar-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 0 12px;
 
-  .btn-accent, .btn-ghost { width: 100%; }
+  .btn-accent, .btn-ghost {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 12px;
+    // The 1.5px border sits inside the box, so trim it from the padding to land the
+    // icon on the same rail as the nav icons above.
+    padding-left: calc(12px - 1.5px);
+    padding-right: calc(12px - 1.5px);
+  }
+
+  i {
+    width: 18px;
+    text-align: center;
+    font-size: 0.95rem;
+  }
 }
 
 .sidebar-section {

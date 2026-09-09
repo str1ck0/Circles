@@ -1,6 +1,6 @@
 class Payment < ApplicationRecord
   belongs_to :user_event
-  has_many :splittees
+  has_many :splittees, dependent: :destroy
   has_many :user_events, through: :splittees
 
   validates :description, presence: true
