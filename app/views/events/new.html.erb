@@ -8,31 +8,6 @@
   </header>
 
   <div class="container-form container-form-page">
-    <%= simple_form_for @event do |f| %>
-      <%= f.error_notification %>
-
-      <%= f.input :title, placeholder: "Sunday braai, poker night, road trip…", autofocus: true %>
-      <%= f.input :location, placeholder: "City, venue or address", hint: "We'll put it on the map." %>
-
-      <div class="row g-2">
-        <div class="col-sm-6"><%= f.input :start_date, as: :string, label: "Starts", input_html: { data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
-        <div class="col-sm-6"><%= f.input :end_date, as: :string, label: "Ends", input_html: { data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
-      </div>
-
-      <%= f.input :photos, as: :file, label: "Photos", input_html: { multiple: true, accept: "image/*" }, hint: "The first one becomes the cover." %>
-
-      <% if current_user.circles.any? %>
-        <%= f.association :circles, as: :check_boxes, label: "Which circles is this for?", collection: current_user.circles.order(:name), item_wrapper_class: "form-check circle-choice", hint: "Everyone in those circles lands on the guest list as invited." %>
-      <% else %>
-        <p class="form-text">You're not in any circles yet — the event will just be yours until you add one.</p>
-      <% end %>
-
-      <%= f.input :private, as: :radio_buttons, label: "Who can see it?", collection: [["Everyone in those circles", false], ["Guest list only", true]], checked: false, item_wrapper_class: "form-check" %>
-
-      <div class="form-actions">
-        <%= f.button :submit, "Create event", class: "btn-accent" %>
-        <%= link_to "Cancel", root_path, class: "btn-ghost" %>
-      </div>
-    <% end %>
+    <%= render "form", event: @event, submit_label: "Create event", cancel_path: root_path %>
   </div>
 </div>

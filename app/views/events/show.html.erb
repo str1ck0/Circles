@@ -47,7 +47,7 @@
       </div>
       <% if event_policy.rsvp? %>
         <div class="event-hero-actions">
-          <p class="eyebrow">Are you in?</p>
+          <p class="eyebrow"><%= event_policy.update? ? "You're hosting" : "Are you in?" %></p>
           <div class="rsvp-group" role="group" aria-label="RSVP">
             <% { "going" => "Going", "maybe" => "Maybe", "declined" => "Can't go" }.each do |status, label| %>
               <button type="button"
@@ -57,6 +57,9 @@
                       data-action="click->rsvp#choose"><%= label %></button>
             <% end %>
           </div>
+          <% if event_policy.update? %>
+            <%= link_to edit_event_path(@event), class: "btn-ghost btn-sm event-hero-edit" do %><i class="fa-solid fa-pen"></i> Edit event<% end %>
+          <% end %>
         </div>
       <% end %>
     </div>

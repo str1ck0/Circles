@@ -57,6 +57,54 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_not event.attendee?(@stranger)
   end
 
+  test "the host can open the edit form and sees a delete control" do
+    sign_in @host
+    get edit_event_path(@event)
+    assert_response :success
+    assert_includes response.body, "Save changes"
+    assert_includes response.body, "Delete event"
+  end
+
+  test "guests cannot open the edit form" do
+    sign_in @circle_member
+    get edit_event_path(@event)
+    assert_redirected_to root_path
+  end
+
+  test "updating without picking photos keeps the existing ones" do
+    @event.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "cover.png", content_type: "image/png")
+    sign_in @host
+    patch event_path(@event), params: { event: { title: "Renamed", photos: [""] } }
+    assert_redirected_to event_path(@event)
+    assert_equal "Renamed", @event.reload.title
+    assert_equal 1, @event.photos.size
+  end
+
+  test "the host can delete an event, taking its guest list and Splitty with it" do
+    payer = @event.user_events.find_by(user: @host)
+    guest = UserEvent.create!(user: @circle_member, event: @event, status: :going)
+    payment = Payment.create!(user_event: payer, description: "Pizza", amount: 20)
+    payment.user_events = [guest]
+    EventMessage.create!(event: @event, user: @host, content: "see you there")
+
+    sign_in @host
+    assert_difference ["Event.count", "Payment.count"], -1 do
+      assert_difference "UserEvent.count", -2 do
+        delete event_path(@event)
+      end
+    end
+    assert_redirected_to root_path
+    assert_equal 0, Splittee.count
+  end
+
+  test "guests cannot delete an event" do
+    sign_in @circle_member
+    assert_no_difference "Event.count" do
+      delete event_path(@event)
+    end
+    assert_redirected_to root_path
+  end
+
   test "only the host can update" do
     sign_in @circle_member
     patch event_path(@event), params: { event: { title: "Hijacked" } }

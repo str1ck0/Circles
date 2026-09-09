@@ -5,7 +5,7 @@ class EventsController < ApplicationController
   end
 
   def create
-    @event = Event.new(event_params.except(:circle_ids))
+    @event = Event.new(attributes_for_save)
     @event.user = current_user
     @event.circles = own_circles(event_params[:circle_ids])
     authorize @event
@@ -18,14 +18,26 @@ class EventsController < ApplicationController
     end
   end
 
+  def edit
+    @event = Event.find(params[:id])
+    authorize @event, :update?
+  end
+
   def update
     @event = Event.find(params[:id])
     authorize @event
-    if @event.update(event_params.except(:circle_ids))
+    if @event.update(attributes_for_save)
       redirect_to event_path(@event), notice: "Event updated."
     else
-      redirect_to event_path(@event), alert: @event.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @event = Event.find(params[:id])
+    authorize @event
+    @event.destroy
+    redirect_to root_path, notice: "Event deleted."
   end
 
   def show
@@ -48,6 +60,14 @@ class EventsController < ApplicationController
 
   def own_circles(ids)
     current_user.circles.where(id: Array(ids).reject(&:blank?))
+  end
+
+  # Circles are managed from the event page, not this form. An empty file field submits a
+  # blank string, which would otherwise wipe the existing photos on update.
+  def attributes_for_save
+    attributes = event_params.except(:circle_ids, :images)
+    attributes.delete(:photos) if Array(attributes[:photos]).all?(&:blank?)
+    attributes
   end
 
   def event_params
