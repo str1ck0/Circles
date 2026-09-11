@@ -96,8 +96,6 @@
   .unread-badge { margin-left: auto; }
 }
 
-// The buttons sit in the nav column, so their icons and labels share the nav's rail
-// rather than centring inside the pill.
 .sidebar-actions {
   display: flex;
   flex-direction: column;
@@ -105,18 +103,27 @@
 
   .btn-accent, .btn-ghost {
     width: 100%;
-    justify-content: flex-start;
-    gap: 12px;
-    // The 1.5px border sits inside the box, so trim it from the padding to land the
-    // icon on the same rail as the nav icons above.
-    padding-left: calc(12px - 1.5px);
-    padding-right: calc(12px - 1.5px);
+    justify-content: center;
+    gap: 10px;
+    // Sit the icon on the label's baseline. Centring the two boxes independently puts
+    // the icon visibly low, because Josefin Sans's ink rides high in its line box while
+    // a Font Awesome glyph sits low in its own; their baselines agree, their boxes don't.
+    align-items: baseline;
+    // The button's height then comes from the content, so symmetric padding centres it.
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 
+  // Icons size to their own glyph so the icon + label group centres on its real ink
+  // rather than inside a fixed box that the narrower glyphs don't fill.
   i {
-    width: 18px;
-    text-align: center;
     font-size: 0.95rem;
+    line-height: 1;
+    position: relative;
+    // On a shared baseline a Font Awesome glyph's ink still centres ~0.065em higher
+    // than the label's, because its ink runs below the baseline and the label's doesn't.
+    // Measured, not guessed: both icons sit 5.70px below baseline centre, labels ~4.74px.
+    top: 0.065em;
   }
 }
 
@@ -124,14 +131,20 @@
   .eyebrow { padding: 0 12px; margin-bottom: 10px; }
 }
 
+// Three per row, each sized to fill its share of the sidebar's inner width.
 .ring-rail {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 44px);
-  justify-content: start;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding: 0 12px;
 
   a { display: block; line-height: 0; }
+
+  .ring-avatar {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
 }
 
 .sidebar-foot {
