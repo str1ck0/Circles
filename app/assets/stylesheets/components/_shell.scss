@@ -105,8 +105,11 @@
     width: 100%;
     justify-content: center;
     gap: 10px;
-    // Symmetric padding so the icon lands on the button's true centre — the base
-    // button's 11px/9px is an optical nudge for text-only labels.
+    // Sit the icon on the label's baseline. Centring the two boxes independently puts
+    // the icon visibly low, because Josefin Sans's ink rides high in its line box while
+    // a Font Awesome glyph sits low in its own; their baselines agree, their boxes don't.
+    align-items: baseline;
+    // The button's height then comes from the content, so symmetric padding centres it.
     padding-top: 10px;
     padding-bottom: 10px;
   }
@@ -116,6 +119,11 @@
   i {
     font-size: 0.95rem;
     line-height: 1;
+    position: relative;
+    // On a shared baseline a Font Awesome glyph's ink still centres ~0.065em higher
+    // than the label's, because its ink runs below the baseline and the label's doesn't.
+    // Measured, not guessed: both icons sit 5.70px below baseline centre, labels ~4.74px.
+    top: 0.065em;
   }
 }
 
