@@ -74,7 +74,7 @@
                data-controller="map"
                data-map-markers-value="<%= @marker.to_json %>"
                data-map-api-key-value="<%= ENV['MAPBOX_API_KEY'] %>"></div>
-          <p class="text-dim mt-2 mb-0"><i class="fa-solid fa-location-dot"></i> <%= @event.location %></p>
+          <p class="map-caption"><i class="fa-solid fa-location-dot"></i> <%= @event.location %></p>
         </section>
       <% end %>
 

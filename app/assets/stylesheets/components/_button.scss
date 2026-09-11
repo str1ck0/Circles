@@ -20,6 +20,16 @@
   &:active { transform: translateY(1px); }
   &:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  // Centring a flex row lines up the icon's and label's *boxes*, which is not the same as
+  // lining up what you see: the label's ink rides high in its line box (cap height above
+  // the baseline, unused descender space below) while a Font Awesome glyph fills its own.
+  // These nudges put the icon's ink centre on the label's cap-height centre. The values are
+  // measured in the browser, not guessed — CLAUDE.md has the script.
+  > i {
+    position: relative;
+    top: -0.159em;
+  }
 }
 
 .btn-accent {
@@ -51,6 +61,9 @@
 .btn-sm {
   padding: 8px 14px 6px;
   font-size: 0.8rem;
+
+  // Smaller buttons need their own value; the offset doesn't scale linearly with size.
+  > i { top: -0.079em; }
 }
 
 .btn-block { width: 100%; }

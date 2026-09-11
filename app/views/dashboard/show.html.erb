@@ -36,7 +36,7 @@
         <div class="empty-state empty-state-compact">
           <h3>Nothing on the calendar</h3>
           <p>Plan something for one of your circles.</p>
-          <%= link_to "New event", new_event_path, class: "btn-ghost btn-sm" %>
+          <%= link_to "New Event", new_event_path, class: "btn-ghost btn-sm" %>
         </div>
       <% end %>
     </section>
@@ -68,7 +68,7 @@
     <section class="dash-card dash-wide">
       <h2 class="section-title">
         Your circles
-        <%= link_to new_circle_path, class: "section-title-action", title: "New circle" do %><i class="fa-solid fa-plus"></i><% end %>
+        <%= link_to new_circle_path, class: "section-title-action", title: "New Circle" do %><i class="fa-solid fa-plus"></i><% end %>
       </h2>
       <% if @circles.any? %>
         <div class="circle-cards">
@@ -80,7 +80,7 @@
         <div class="empty-state empty-state-compact">
           <h3>No circles yet</h3>
           <p>Start one for your crew, or join an open circle from the home page.</p>
-          <%= link_to "New circle", new_circle_path, class: "btn-accent btn-sm" %>
+          <%= link_to "New Circle", new_circle_path, class: "btn-accent btn-sm" %>
         </div>
       <% end %>
     </section>
