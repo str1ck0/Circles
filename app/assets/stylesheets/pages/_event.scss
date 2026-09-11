@@ -164,6 +164,14 @@
   .mapboxgl-canvas { border-radius: var(--r-lg); }
 }
 
+.map-caption {
+  margin: 10px 0 0;
+  color: var(--text-dim);
+
+  // Inline context, so the icon rides the baseline and needs the opposite nudge to buttons.
+  i { position: relative; top: 0.046em; margin-right: 4px; }
+}
+
 // Splitty
 .splitty {
   display: grid;

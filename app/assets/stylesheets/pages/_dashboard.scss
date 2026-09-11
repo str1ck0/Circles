@@ -51,6 +51,8 @@
   color: var(--text-dim);
 
   &:hover { color: var(--accent); }
+
+  > i { position: relative; top: -0.121em; }
 }
 
 .people-grid {

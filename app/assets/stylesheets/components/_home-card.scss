@@ -81,6 +81,9 @@
   margin: 0;
   font-size: 0.8rem;
   color: var(--text-dim);
+
+  // Inline (non-flex) context, so the icon rides the baseline and needs the opposite nudge.
+  i { position: relative; top: 0.053em; }
 }
 
 .chip {
@@ -97,6 +100,8 @@
   letter-spacing: 0.04em;
   color: var(--text);
   line-height: 1;
+
+  > i { position: relative; top: -0.134em; }
 
   i { font-size: 0.7rem; }
 }
@@ -143,6 +148,9 @@
     margin: 0;
     font-size: 0.8rem;
     color: var(--text-dim);
+
+    // Inline context, so the icon rides the baseline and needs the opposite nudge.
+    i { position: relative; top: 0.046em; }
   }
 
   form { margin: 10px 0 0; }

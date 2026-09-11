@@ -5,10 +5,6 @@
         <p class="eyebrow">Hey <%= current_user.first_name %></p>
         <h1>What's on</h1>
       </div>
-      <div class="page-actions">
-        <%= link_to new_circle_path, class: "btn-accent btn-sm" do %><i class="fa-solid fa-plus"></i> New circle<% end %>
-        <%= link_to new_event_path, class: "btn-ghost btn-sm" do %><i class="fa-regular fa-calendar-plus"></i> New event<% end %>
-      </div>
     </header>
 
     <% if @events.any? %>

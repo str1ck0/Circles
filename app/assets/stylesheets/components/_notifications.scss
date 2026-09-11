@@ -102,5 +102,6 @@
   color: var(--text-dim);
   margin-bottom: 22px;
 
-  i { color: var(--accent); }
+  // Inline context, so the icon rides the baseline and needs the opposite nudge to buttons.
+  i { color: var(--accent); position: relative; top: 0.046em; }
 }

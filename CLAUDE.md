@@ -119,6 +119,45 @@ failure:
   or `var()`/`calc()` inside them. Use `width` + `max-width`, or media queries, instead.
   `clamp()` and `minmax()` are fine (not Sass functions).
 
+## Icon alignment
+
+Font Awesome glyphs and Josefin Sans don't centre alike: the label's ink rides high in its
+line box (cap height above the baseline, unused descender space below) while a glyph fills
+its own, so a centred flex row lines up the *boxes* but not what you see. Every
+icon-beside-text context therefore carries a small measured `top` nudge — negative in flex
+rows (`%btn-base`, `.btn-sm`, `.chip`, `.dash-link`, `.sidebar-actions`), positive in inline
+ones (`.event-card-meta`, `.map-caption`, `.circle-card-body p`, `.invite-landing-meta`),
+because the two regimes err in opposite directions. The values differ per context and don't
+scale linearly with font-size, so **measure, don't guess** — paste this in the browser
+console to audit a page (it reports icon ink centre minus label cap-height centre; aim for
+under ~0.3px):
+
+```js
+const c = document.createElement('canvas').getContext('2d');
+document.querySelectorAll('a,button,span,p,li,div,h5,h2,dd').forEach(el => {
+  const i = el.querySelector(':scope > i'); if (!i) return;
+  const t = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()); if (!t) return;
+  const ir = i.getBoundingClientRect(); if (!ir.width) return;
+  const ics = getComputedStyle(i), ip = getComputedStyle(i, '::before');
+  c.font = `${ip.fontWeight} ${ics.fontSize} ${ip.fontFamily}`;
+  const im = c.measureText(ip.content.slice(1, -1));
+  const iC = ir.top + (ir.height - (im.fontBoundingBoxAscent + im.fontBoundingBoxDescent)) / 2 +
+             im.fontBoundingBoxAscent - (im.actualBoundingBoxAscent - im.actualBoundingBoxDescent) / 2;
+  const r = document.createRange(); r.selectNodeContents(t);
+  const tr = r.getBoundingClientRect(), tcs = getComputedStyle(el);
+  if (tr.height > parseFloat(tcs.fontSize) * 1.8) return; // skip wrapped text
+  c.font = `${tcs.fontWeight} ${tcs.fontSize} ${tcs.fontFamily}`;
+  const tm = c.measureText('H');
+  const tCap = tr.top + (tr.height - (tm.fontBoundingBoxAscent + tm.fontBoundingBoxDescent)) / 2 +
+               tm.fontBoundingBoxAscent - tm.actualBoundingBoxAscent / 2;
+  console.log(el.className || el.tagName, (iC - tCap).toFixed(2) + 'px');
+});
+```
+
+Judge against the label's **cap-height** centre, not its ink centre — a label with a
+descender ("View profile") has a lower ink centre than one without ("Invite friends"), so
+matching ink makes the icon jump around between buttons.
+
 Routes are deliberately trimmed to implemented actions only, so scaffold-style tests and
 `link_to` helpers for unimplemented CRUD will not resolve.
 
