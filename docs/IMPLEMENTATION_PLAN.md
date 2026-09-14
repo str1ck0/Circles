@@ -1,178 +1,99 @@
 # Circles — Implementation Plan
 
-Working document for the portfolio push. Updated 2026-09-07.
+Working document for the portfolio push. Updated 2026-09-14.
 
-**Goal:** turn Circles into a polished, production-quality social app worth showing as a
-portfolio piece: correct authorization, real product features, and a professional UI —
-without rebuilding the stack.
+**Goal:** a polished, production-quality social app worth showing as a portfolio piece —
+correct authorization, real product features, professional UI. **Non-goals:** migrating off
+Rails/Hotwire/Bootstrap, swapping Postgres, replacing Devise.
 
-**Non-goals:** migrating off Rails/Hotwire/Bootstrap, swapping Postgres, replacing Devise.
+> Architecture, conventions and the gotchas that bite (test env, libsass, icon alignment,
+> deploy verification) live in **`CLAUDE.md`** — read that first. This file is the product
+> and roadmap record: what was decided, what shipped, what's left.
 
 ---
 
-## Status at a glance
+## Where things stand
 
-| Area | State |
-|---|---|
-| Core features | ✅ Done, verified in browser |
-| Deploy | ✅ **Live at https://circles-rpke.onrender.com** (Render + Neon + Upstash) |
-| Audit | ✅ [Findings report](https://claude.ai/code/artifact/65ee6d6f-ba2f-483d-94df-a0d33c79dfed) — 9 critical, 3 high, 1 medium, 3 low |
-| Phase 1 — Authorization foundation | ✅ PR [#3](https://github.com/str1ck0/Circles/pull/3) — merged, live |
-| Phase 2 — RSVP states | ✅ PR [#4](https://github.com/str1ck0/Circles/pull/4) — merged |
-| Phase 3 — Invitations + notifications | ✅ PR [#5](https://github.com/str1ck0/Circles/pull/5) — merged |
-| Phase 4 — Profiles + user search | ✅ PR [#6](https://github.com/str1ck0/Circles/pull/6) — merged |
-| Phase 5 — UI revamp | ✅ 5a [#7](https://github.com/str1ck0/Circles/pull/7) · 5b [#8](https://github.com/str1ck0/Circles/pull/8) · 5c [#9](https://github.com/str1ck0/Circles/pull/9) · 5d [#10](https://github.com/str1ck0/Circles/pull/10) |
-| Phase 6 — Concern extraction + cleanup | 🔄 `chore/concern-extraction-cleanup` |
+**Live at https://circles-rpke.onrender.com** (Render + Neon + Upstash). Merging to
+`master` auto-deploys. Demo login `benten@gmail.com` / `password`.
+
+**108 tests, green.** Coverage is concentrated where the risk is: policies, every guarded
+controller path, channels, and the payment split.
+
+The app is feature-complete against the plan below. Everything from the original audit is
+closed, all six phases shipped, and the UI has been rebuilt end to end.
 
 ---
 
 ## Product decisions (agreed 2026-09-07)
 
-- **Circles are public clubs or private groups.** `circles.private = false` → browsable by
-  every signed-in user and joinable with one click. `private = true` → visible only to
-  members; people get in by being invited by an existing member, either in-app (user
-  search) or via an invite link.
-- **Events inherit from their circles.** An event is visible to its attendees and, unless
-  `events.private`, to members of any circle it's attached to. Attaching a circle to an
-  event enrols that circle's members.
-- **Visual direction:** evolve the existing identity — dark ground, orbit motif, neon ring
-  colours — rebuilt to a professional standard. Bootstrap 5 + SCSS stays.
-- **Features in scope:** RSVP states (going / maybe / can't), in-app + link invitations,
-  public profiles with name search, activity feed / notifications with unread badges.
+These shaped the whole build; changing them means revisiting a lot.
+
+- **Circles are public clubs or private groups.** `private = false` → browsable by every
+  signed-in user and joinable in one click. `private = true` → visible only to members,
+  who get in by invitation (in-app or link).
+- **Events inherit visibility from their circles.** An event is visible to its guest list
+  and, unless `events.private`, to members of any attached circle. Attaching a circle puts
+  its members on the guest list as `invited`.
+- **The guest list is the access list.** Any row on `user_events` — whatever the RSVP
+  status, including `declined` — grants chat, playlists and Splitty access.
+- **Visual direction:** evolve the original identity (dark ground, orbit motif, neon ring
+  colours, orange accent) rather than restyling from scratch. Bootstrap 5 + SCSS stays.
 
 ---
 
-## Phase 1 — Authorization foundation ✅ (PR #3)
+## What shipped
 
-Closed every AUTH finding and the three BUG findings from the audit in one PR, and shipped
-public-circle discovery at the same time so new signups have a way in (the `User#friends`
-cold-start problem described in the audit). Details, as built:
+| # | PR | What |
+|---|---|---|
+| 1 | [#3](https://github.com/str1ck0/Circles/pull/3) | **Authorization foundation** — Pundit policies, cable identification, `private` made real, public-circle discovery, plus the three correctness bugs from the audit |
+| 2 | [#4](https://github.com/str1ck0/Circles/pull/4) | **RSVP states** — invited / going / maybe / declined, live counts, guest list grouped by answer |
+| 3 | [#5](https://github.com/str1ck0/Circles/pull/5) | **Invitations + notifications** — personal invites and 7-day links, activity feed, unread badge |
+| 4 | [#6](https://github.com/str1ck0/Circles/pull/6) | **Profiles + people directory** — public profiles, bio, handle, name/username search |
+| 5 | [#7](https://github.com/str1ck0/Circles/pull/7) [#8](https://github.com/str1ck0/Circles/pull/8) [#9](https://github.com/str1ck0/Circles/pull/9) [#10](https://github.com/str1ck0/Circles/pull/10) | **UI revamp** — design tokens and app shell, then circle, event, and dashboard/profile/forms |
+| 6 | [#11](https://github.com/str1ck0/Circles/pull/11) | **Concern extraction + cleanup** — the circle/event mirror collapsed into shared concerns and base classes, one chat Stimulus controller, README rewritten |
+| — | [#12](https://github.com/str1ck0/Circles/pull/12) [#13](https://github.com/str1ck0/Circles/pull/13) | Invite-on-create for new circles, chat/sidebar alignment, mobile pass |
+| — | [#14](https://github.com/str1ck0/Circles/pull/14) | **Event editing and deletion** (+ the Splitty cascade fix that made deletion possible) |
+| — | [#15](https://github.com/str1ck0/Circles/pull/15) | **Leave a circle / owner removes members** |
+| — | [#16](https://github.com/str1ck0/Circles/pull/16) [#17](https://github.com/str1ck0/Circles/pull/17) | Sidebar and app-wide icon alignment, circle rail sizing, label capitalisation |
 
-- Add **Pundit**. `CirclePolicy` and `EventPolicy` carry every rule; join-table controllers
-  authorize against the parent (`authorize @circle, :post_message?`), so there are only
-  two policies to reason about.
-- `ApplicationCable::Connection` identifies `current_user` via Warden; both chat channels
-  `reject` unless the policy allows `show?`.
-- `PagesController#home` uses `policy_scope` and gains a **Discover** list of public
-  circles the user hasn't joined. Signed-out visitors see public circles and their public
-  events only.
-- Make `private` real: migrations default it to `false`/`NOT NULL` on both tables.
-- `UserEvent` gets a uniqueness validation (attaching a circle twice currently creates
-  duplicate rows).
-- `PaymentsController#create`: transaction, guard `save`, validations on `Payment`,
-  remainder goes to the payer so balance deltas always sum to zero.
-- `UserEventsController#create`: fix the `respond_to` `NameError`.
-- Dashboard: scope another user's circles to what the viewer may see, guard the
-  zero-circles crash, remove the hard-coded fake invites/notifications.
-- Tests: policy tests, controller tests for each guarded path, channel connection test,
-  payment split test. Replace the stale `user_circles_controller_test.rb` scaffold.
-- Sticky footer on short pages (login/signup).
-
-## Phase 2 — RSVP states 🔄
-
-`user_events.status` enum: `invited` (default), `going`, `maybe`, `declined`. The
-migration backfills every pre-existing row to `going` (they were binary attendees).
-Attaching a circle puts members on the guest list as `invited`; the host is `going`.
-Cards show the `going` count; the event page has a Going / Maybe / Can't go control
-(`rsvp_controller.js`, replacing `attend_controller.js`) and a guest list grouped by
-status. `UserEventsController#create` upserts the current user's row.
-
-Being on the guest list in any state (including declined) still counts as an attendee
-for chat/playlists/payments — the guest list *is* the access list. Only `going` guests
-are offered as payers/splittees.
-
-## Phase 3 — Invitations + notifications 🔄
-
-Coupled because an invite *is* a notification.
-
-- `Invitation` (circle, inviter, invitee nullable, token, status, expires_at,
-  accepted_at). Personal invites are one-shot and land in the invitee's notifications with
-  Accept/Decline. Link invites (`invitee` nil) live at `/invites/:token`, stay open for 7
-  days, and can be redeemed by anyone signed in. Replaced the direct "add member" —
-  `UserCirclesController` is self-join only now.
-- `Notification` (recipient, actor, notifiable polymorphic, kind, read_at) with kinds
-  `circle_invitation`, `invitation_accepted`, `event_created`, `rsvp`, `circle_joined`.
-  Always created through `Notification.notify`, which skips self-notifications. Every
-  notifiable declares `has_many :notifications, as: :notifiable, dependent: :destroy`.
-  Unread badge in the home sidebar, `/notifications` marks everything read on view,
-  clicking one marks it read and redirects to its subject.
-
-## Phase 4 — Profiles + user search 🔄
-
-`users#show` public profile (avatar, name, `@username`, bio, joined date, the circles the
-*viewer* may see via `policy_scope`, upcoming events). `users#index` is the people
-directory: defaults to your circle-mates, searches everyone by name/username
-(`User.search`, also used by the invite modal). Adds `users.bio`; the Devise edit form now
-covers photo, names, username and bio. `dashboard/:id` for anyone but yourself redirects
-to their profile. The dead `users#profile` route and the Le Wagon navbar partial are gone.
-
-## Phase 5 — UI revamp 🔄
-
-Screen by screen, each its own PR. Rewrite SCSS cleanly on top of Bootstrap; keep the
-orbit/ring motif, the dark ground and the orange accent.
-
-- **5a — foundations + shell + home + auth** (this PR): tokens (`config/_colors.scss`,
-  `_tokens.scss`, `_bootstrap_variables.scss`), Josefin Sans (display) + Work Sans (body),
-  the app shell with a persistent sidebar (nav, actions, circle rails, unread badge) that
-  collapses to a top bar under 992px, `.btn-accent`/`.btn-ghost`, ringed avatars, event
-  and circle cards, toast flashes, slim footer, the signed-out landing with the orbit,
-  Devise pages as a centred card. Older pages get a compatibility block in `_shell.scss`.
-- **5b — circle page**: banner hero with ringed avatar, meta and actions (join / invite /
-  create event / owner delete); main column with upcoming events (event cards), memories
-  carousel and playlists; sticky aside with the chat panel (`components/_chatroom.scss`,
-  shared with events) and the members list. Shared playlist/modal/invite-row styles moved
-  to `components/_playlists.scss`; `_circle-show-card.scss` deleted.
-- **5c — event page**: photo-carousel hero with the RSVP control and live counts; main
-  column with the map (only when geocoded), Splitty (balances + add-a-cost form) and
-  playlists; sticky aside with chat, details (host, dates, visibility, circles), guest
-  list grouped by RSVP, and invite-a-circle. `_event_show.scss` deleted; the map
-  controller skips mounting without a key or markers.
-- **5d — dashboard, profile, people, notifications, invite landing, new circle / new
-  event / edit profile forms**: dashboard becomes a card grid (next up with your RSVP,
-  invites, your circles, people, playlists across circles, discover events); forms use
-  `.page-narrow` + `.container-form-page`, real labels/hints, check-box circle pickers,
-  Tom Select for adding people, a free-text location instead of the capital-city list.
-  The text-scramble and hello controllers, the legacy orbit CSS and the last shell
-  compatibility block are gone.
-
-## Phase 6 — Concern extraction + cleanup 🔄
-
-- The circle/event mirror now shares one implementation (audit DUP-01): `ChatMessage`
-  and `SpotifyEmbed` model concerns (with validations both sides lacked), a
-  `ChatroomChannel` base, `ChatMessagesController` and `PlaylistsController` bases, the
-  `shared/_chat_message` partial and a single `chatroom-subscription` Stimulus controller.
-- Favicon lives in `app/assets/images/favicon.svg`; the home feed is capped at 30 upcoming
-  events; the dead `gradient` controller and leftover console logging are gone.
-- README rewritten for the app as it is now.
-
-## What's next (ideas, not commitments)
-
-- ~~Event editing UI and deletion~~ ✅ — shared `events/_form` partial for new/edit, host-only
-  edit button in the hero, delete in a danger zone. `UserEvent`/`Payment` now cascade to
-  `payments`/`splittees` so deleting an event doesn't orphan Splitty rows.
-- ~~Leave a circle / remove a member~~ ✅ — members leave from the circle hero, the owner
-  removes others from the members list, and the last member out takes the empty circle
-  with them. The owner can't leave (they delete instead) — **transferring ownership is
-  still open**, and would be the natural way to let an owner hand over and leave.
-- Pagination for chat history and the people directory.
-- System tests for the chat and RSVP flows (Capybara is already in the Gemfile).
+The audit that drove phases 1–6:
+[findings report](https://claude.ai/code/artifact/65ee6d6f-ba2f-483d-94df-a0d33c79dfed)
+(9 critical, 3 high, 1 medium, 3 low — all closed).
 
 ---
 
-## Context worth not re-deriving
+## What's next
 
-- **The mirror pattern.** Circles and events each have their own messages, channel,
-  playlists and Stimulus subscription controller. Fixes on one side almost always need the
-  twin on the other.
-- **`balance` is on `user_events`, not `users`** — bill splitting is scoped per event, not a
-  global wallet.
-- **`Circle#owner` was added by later migration** and is `optional: true`.
-- **Chat works locally with no Redis** thanks to the `async` adapter, so "it works on my
-  machine" tells you nothing about production. Production needs `REDIS_URL` + `APP_HOST`
-  (both set on Render).
-- **Routes are trimmed to implemented actions**, so missing URL helpers are usually
-  intentional, not a bug.
-- **Production seeds run only when `User.count.zero?`** (`bin/render-build.sh`), so
-  migrations must carry defaults/backfills for existing rows.
-- **Repo is `str1ck0/Circles`, default branch `master`.** PR-per-phase; doc-only fixes may
-  go straight to master.
+Nothing is in flight. These are the open threads, roughly in order of value:
+
+**1. Transfer circle ownership.** The most load-bearing gap. Today an owner can't leave a
+circle — `CirclePolicy#leave?` refuses, because leaving would orphan it — so their only
+exit is deleting the circle out from under everyone. Let an owner hand over to another
+member, then allow them to leave. Needs: a policy action, a control in the members panel,
+and a notification to the new owner. See the membership rules in `CLAUDE.md`.
+
+**2. Pagination.** Two unbounded queries: circle/event chat history loads every message,
+and the people directory caps at 30 with no way to page. The home feed is already capped at
+30 upcoming events. Chat wants "load older" rather than numbered pages.
+
+**3. System tests for chat and RSVP.** Capybara and selenium-webdriver are already in the
+Gemfile and unused. The suite covers policies and controllers well, but nothing exercises
+the Action Cable round trip or the RSVP Stimulus controller in a real browser — both were
+verified by hand each time instead.
+
+**Smaller things:** the event-hero meta icons sit ~0.3px off (below perception, left
+deliberately); `docs/screenshots/` is empty and the README has no images; there's no CI —
+tests run locally only.
+
+---
+
+## Notes for whoever picks this up
+
+- **Work in a branch, PR, then merge** — merging deploys to production. As of 2026-09-11
+  the owner wants to be **asked before anything is committed or pushed**.
+- **Verify in the browser, not just the suite.** Several bugs here (chat rendering, icon
+  alignment, the RSVP control) only showed up in a real page. `CLAUDE.md` has the icon
+  audit script and the deploy-verification snippet.
+- **Local seed dates are relative to seed time**, so a database seeded a while ago shows
+  everything under "Past". `bin/rails db:seed` to refresh.

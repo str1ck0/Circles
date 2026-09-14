@@ -84,6 +84,18 @@ which drops self-notifications; anything that can be a `notifiable` must declare
 `has_many :notifications, as: :notifiable, dependent: :destroy` or the polymorphic
 `belongs_to` dangles after the subject is deleted.
 
+**Membership changes have rules worth knowing before you touch them.** A member leaves via
+`UserCirclesController#destroy`; the owner uses the same action to remove someone else
+(`CirclePolicy#leave?` vs `#remove_member?`). The **owner can't leave** — they'd orphan the
+circle, so they delete it instead; transferring ownership doesn't exist yet and is the
+obvious way to lift that restriction. The **last member out destroys the circle**, because
+an empty private circle is unreachable for everyone.
+
+**Deleting records that touch the Splitty needs the cascade.** `payments` and `splittees`
+both hang off `user_events` with `NOT NULL` foreign keys, so `UserEvent` declares
+`dependent: :destroy` for both and `Payment` does for `splittees`. Without those, deleting
+an event (or a guest) raises a FK violation — it was latent until event deletion shipped.
+
 **Bill splitting lives on the join table, not the user.** `balance` is a column on
 `user_events`, so it is per-event, not a global wallet. The split arithmetic is in
 `PaymentsController#create`, wrapped in a transaction; the payer absorbs the integer
@@ -163,7 +175,23 @@ Routes are deliberately trimmed to implemented actions only, so scaffold-style t
 
 ## Deployment
 
-Not yet deployed. `render.yaml` + `bin/render-build.sh` target Render (web) with Neon
-(Postgres) and Upstash (Redis). The build script runs `db:prepare` then seeds **only if
-`User.count.zero?`**, so redeploys don't wipe visitor data. See
-`docs/IMPLEMENTATION_PLAN.md` for the full sequence and current status.
+**Live at https://circles-rpke.onrender.com** — Render (web, free tier, Frankfurt) with
+Neon (Postgres) and Upstash (Redis), configured by `render.yaml` + `bin/render-build.sh`.
+Merging to `master` auto-deploys; a build takes about 90 seconds. The free dyno sleeps when
+idle, so the first request after a quiet spell takes ~30s.
+
+The build script runs `db:prepare` then seeds **only if `User.count.zero?`**, so redeploys
+preserve visitor data — which means **migrations must carry their own defaults and
+backfills**, since the seeds won't re-run to fix anything up.
+
+`APP_HOST` is set to the Render hostname and feeds
+`config.action_cable.allowed_request_origins`. Without it the site loads fine and chat
+silently fails to connect, with nothing obvious in the logs.
+
+To confirm a deploy landed, grep the live CSS bundle for a selector you just added rather
+than trusting a page screenshot:
+
+```bash
+css=$(curl -s https://circles-rpke.onrender.com/ | grep -o '/assets/application-[a-f0-9]*\.css' | head -1)
+curl -s "https://circles-rpke.onrender.com$css" | grep -c "your-new-class"
+```
