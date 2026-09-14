@@ -26,9 +26,9 @@ split the bill — without the group-chat chaos.
 
 | | |
 |---|---|
-| 👥 **Circles** | Open clubs anyone can join, or private circles that are invite-only. Each has a photo, banner and its own ring colour. |
+| 👥 **Circles** | Open clubs anyone can join, or private circles that are invite-only. Each has a photo, banner and its own ring colour. Members can leave; owners can remove people. |
 | ✉️ **Invitations** | Members invite people in-app (with a notification to accept or decline) or share a 7-day invite link. |
-| 📅 **Events** | Plan events for one or more circles — everyone in those circles lands on the guest list. Dates, location, photos. |
+| 📅 **Events** | Plan events for one or more circles — everyone in those circles lands on the guest list. Dates, location, photos. Hosts can edit or delete. |
 | ✅ **RSVPs** | Going / Maybe / Can't go, with live counts and a guest list grouped by answer. |
 | 💬 **Real-time chat** | A chat room in every circle and event over Action Cable — members only. |
 | 🔔 **Notifications** | Invites, new events, RSVPs on your events, people joining your circle. Unread badge in the sidebar. |
