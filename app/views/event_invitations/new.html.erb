@@ -1,0 +1,35 @@
+<% content_for :title, "Invite people to #{@event.title}" %>
+<div class="page page-narrow">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow"><%= @event.title %></p>
+      <h1>Invite people</h1>
+      <p class="text-dim">Guests can see this event and choose whether to come. Your circle stays private.</p>
+    </div>
+  </header>
+
+  <%= form_with url: new_event_event_invitation_path(@event), method: :get, class: "mb-4" do |f| %>
+    <%= f.label :q, "Search by name or handle", class: "form-label" %>
+    <div class="d-flex gap-2">
+      <%= f.search_field :q, value: @query, class: "form-control", placeholder: "Find someone on Circles" %>
+      <%= f.submit "Search", class: "btn-accent btn-sm" %>
+    </div>
+  <% end %>
+
+  <h2 class="section-title"><%= @query.present? ? "Search results" : "People from your circles" %></h2>
+  <% @users.each do |person| %>
+    <div class="invitation-card">
+      <%= user_avatar person, class: "ring-avatar ring-avatar-sm" %>
+      <p><strong><%= person.full_name %></strong><br><span class="text-dim"><%= person.handle %></span></p>
+      <%= button_to "Invite", event_event_invitations_path(@event),
+                    params: { event_invitation: { user_id: person.id } }, class: "btn-ghost btn-sm",
+                    aria: { label: "Invite #{person.full_name}" } %>
+    </div>
+  <% end %>
+  <% if @users.empty? %>
+    <p class="text-dim">No people to show. Search for someone by name or handle; existing guests are already invited.</p>
+  <% elsif @users.size == 20 %>
+    <p class="text-dim">Showing up to 20 people. Refine your search to find someone else.</p>
+  <% end %>
+  <%= link_to "Back to event", event_path(@event), class: "btn-ghost mt-3" %>
+</div>

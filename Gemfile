@@ -78,9 +78,9 @@ end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
+  gem "capybara", "~> 3.40"
+  # Selenium Manager handles ChromeDriver; this release supports the current Ruby 3.1 runtime.
+  gem "selenium-webdriver", "~> 4.27.0"
 end
 
 gem "pundit", "~> 2.5"

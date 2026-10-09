@@ -1,0 +1,11 @@
+<div class="invitation-card event-invitation">
+  <p>
+    <strong><%= link_to invitation.event.title, event_path(invitation.event) %></strong><br>
+    <span class="text-dim"><%= invitation.event.start_date.strftime("%a %-d %b · %H:%M %Z") %></span><br>
+    Hosted by <%= invitation.event.user.full_name %>
+  </p>
+  <div class="invitation-actions">
+    <%= button_to "Going", event_user_events_path(invitation.event), params: { user_event: { status: "going" } }, class: "btn-accent btn-sm" %>
+    <%= button_to "Can't go", event_user_events_path(invitation.event), params: { user_event: { status: "declined" } }, class: "btn-ghost btn-sm" %>
+  </div>
+</div>

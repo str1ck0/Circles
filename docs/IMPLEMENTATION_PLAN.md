@@ -1,6 +1,43 @@
 # Circles — Implementation Plan
 
-Working document for the portfolio push. Updated 2026-09-14.
+Working document for the portfolio push. Updated 2026-10-09.
+
+## Current follow-up: product focus and correctness
+
+The September audit found gaps beyond the original plan below. Its completion claims
+describe the previous implementation pass, not production readiness.
+
+This follow-up restricts circle-page event cards and memories to the viewer's event
+policy scope and rejects event end times that are not after the start.
+
+**Current product direction:** prioritise a polished portfolio experience over expanding
+social-network features. Circles are ongoing groups. An event can have one optional
+organising circle, while hosts invite individual users independently of circle membership.
+Standalone events are invitation-only. Circle-visible events remain discoverable to members
+without automatically creating guest records. Invite-only events require an individual
+invitation. Existing multi-circle event associations and guest records remain intact; the
+bulk circle-invitation endpoint and automatic enrolment have been removed.
+
+Individual invitations appear in notifications and the dashboard, where guests can RSVP.
+Repeated invitations preserve existing responses and do not send duplicate notifications.
+RSVP uses Turbo forms to refresh the full event page, and event times display the application's
+current timezone explicitly (UTC by default; per-event timezone selection remains future work).
+The dashboard's next plan excludes unanswered invitations and declined events.
+
+Validation: `bin/rails test` passes with 121 tests and 525 assertions. The headless Chrome
+invitation/RSVP system test passes with 10 assertions, including a 390px mobile viewport,
+updated RSVP/guest-list state, and absence of horizontal overflow. JavaScript builds
+successfully with bundle-size warnings (338 KiB). The obsolete driver manager has been
+replaced with Selenium Manager. Test-only Capybara/Selenium versions are updated; the
+Ruby/Rails runtime upgrade is still outstanding.
+
+Still outstanding: access revocation after removal, account deletion/ownership handling,
+runtime dependency upgrades, event descriptions and per-event timezones, cancellation and
+update notifications, atomic circle creation, expense integrity, CI, and broader browser
+coverage (especially live chat delivery). Event creation now saves the event and host RSVP
+in one transaction.
+
+---
 
 **Goal:** a polished, production-quality social app worth showing as a portfolio piece —
 correct authorization, real product features, professional UI. **Non-goals:** migrating off
@@ -12,7 +49,7 @@ Rails/Hotwire/Bootstrap, swapping Postgres, replacing Devise.
 
 ---
 
-## Where things stand
+## Previous implementation pass (September 2026)
 
 **Live at https://circles-rpke.onrender.com** (Render + Neon + Upstash). Merging to
 `master` auto-deploys. Demo login `benten@gmail.com` / `password`.
@@ -65,7 +102,7 @@ The audit that drove phases 1–6:
 
 ## What's next
 
-Nothing is in flight. These are the open threads, roughly in order of value:
+The previous pass identified these open threads; the follow-up above supersedes their priority:
 
 **1. Transfer circle ownership.** The most load-bearing gap. Today an owner can't leave a
 circle — `CirclePolicy#leave?` refuses, because leaving would orphan it — so their only

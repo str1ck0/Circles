@@ -5,8 +5,8 @@
   <%= f.input :location, placeholder: "City, venue or address", hint: "We'll put it on the map." %>
 
   <div class="row g-2">
-    <div class="col-sm-6"><%= f.input :start_date, as: :string, label: "Starts", input_html: { value: event.start_date&.strftime("%Y-%m-%d %H:%M"), data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
-    <div class="col-sm-6"><%= f.input :end_date, as: :string, label: "Ends", input_html: { value: event.end_date&.strftime("%Y-%m-%d %H:%M"), data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
+    <div class="col-sm-6"><%= f.input :start_date, as: :string, label: "Starts (#{Time.zone.name})", input_html: { value: event.start_date&.strftime("%Y-%m-%d %H:%M"), data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
+    <div class="col-sm-6"><%= f.input :end_date, as: :string, label: "Ends (#{Time.zone.name})", input_html: { value: event.end_date&.strftime("%Y-%m-%d %H:%M"), data: { controller: "flatpicker" }, placeholder: "Pick a date", autocomplete: "off" } %></div>
   </div>
 
   <%= f.input :photos, as: :file, label: "Photos", input_html: { multiple: true, accept: "image/*" },
@@ -14,13 +14,15 @@
 
   <% unless event.persisted? %>
     <% if current_user.circles.any? %>
-      <%= f.association :circles, as: :check_boxes, label: "Which circles is this for?", collection: current_user.circles.order(:name), item_wrapper_class: "form-check circle-choice", hint: "Everyone in those circles lands on the guest list as invited." %>
+      <%= f.input :organising_circle_id, as: :select, label: "Organising circle (optional)",
+                  collection: current_user.circles.order(:name), include_blank: "No circle — invite people directly",
+                  hint: "This places the event in a circle. It does not invite its members automatically." %>
     <% else %>
-      <p class="form-text">You're not in any circles yet — the event will just be yours until you add one.</p>
+      <p class="form-text">You can invite people directly after creating your event.</p>
     <% end %>
   <% end %>
 
-  <%= f.input :private, as: :radio_buttons, label: "Who can see it?", collection: [["Everyone in those circles", false], ["Guest list only", true]], item_wrapper_class: "form-check" %>
+  <%= f.input :private, as: :radio_buttons, label: "Who can see it?", collection: [["Members of the organising circle", false], ["Invited people only", true]], item_wrapper_class: "form-check", hint: "Events without a circle are always invitation-only. Individual invitations never grant circle membership." %>
 
   <div class="form-actions">
     <%= f.button :submit, submit_label, class: "btn-accent" %>

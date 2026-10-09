@@ -22,7 +22,7 @@ class UserEventsController < ApplicationController
         Notification.notify(recipient: @event.user, actor: current_user, notifiable: @user_event, kind: :rsvp)
       end
       respond_to do |format|
-        format.html { redirect_to @event, notice: NOTICES[status] }
+        format.html { redirect_to @event, notice: NOTICES[status], status: :see_other }
         format.json { render json: { status: status, label: NOTICES[status], counts: @event.rsvp_counts } }
       end
     else

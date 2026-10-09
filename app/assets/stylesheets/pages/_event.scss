@@ -113,6 +113,9 @@
   border-radius: var(--r-pill);
   overflow: hidden;
   box-shadow: var(--shadow-1);
+
+  form { margin: 0; }
+  form:last-child .rsvp-button { border-right: none; }
 }
 
 .rsvp-button {
@@ -128,7 +131,6 @@
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 
-  &:last-child { border-right: none; }
   &:hover { color: var(--text); background: var(--surface-2); }
   &:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 

@@ -3,7 +3,7 @@ class Notification < ApplicationRecord
   belongs_to :actor, class_name: "User", optional: true
   belongs_to :notifiable, polymorphic: true
 
-  enum kind: { circle_invitation: 0, invitation_accepted: 1, event_created: 2, rsvp: 3, circle_joined: 4 }
+  enum kind: { circle_invitation: 0, invitation_accepted: 1, event_created: 2, rsvp: 3, circle_joined: 4, event_invitation: 5 }
 
   scope :unread, -> { where(read_at: nil) }
   scope :recent, -> { order(created_at: :desc) }

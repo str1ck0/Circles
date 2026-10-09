@@ -35,10 +35,19 @@ class EventPolicyTest < ActiveSupport::TestCase
     assert_not EventPolicy.new(@circle_member, @private_event).rsvp?
   end
 
-  test "chat, playlists, payments and attaching circles are attendees only" do
-    %i[chat? add_playlist? add_payment? attach_circle?].each do |action|
+  test "chat, playlists and payments are attendees only" do
+    %i[chat? add_playlist? add_payment?].each do |action|
       assert EventPolicy.new(@attendee, @public_event).public_send(action), action
       assert_not EventPolicy.new(@circle_member, @public_event).public_send(action), action
+    end
+  end
+
+  test "only the host can invite people" do
+    [@public_event, @private_event].each do |event|
+      assert EventPolicy.new(@host, event).invite?
+      [@attendee, @circle_member, @stranger, nil].each do |viewer|
+        assert_not EventPolicy.new(viewer, event).invite?
+      end
     end
   end
 

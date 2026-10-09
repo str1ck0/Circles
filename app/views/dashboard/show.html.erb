@@ -46,7 +46,7 @@
         Invites
         <% if @pending_invitations.any? %><span class="unread-badge"><%= @pending_invitations.size %></span><% end %>
       </h2>
-      <% if @pending_invitations.any? %>
+      <% if @pending_invitations.any? || @event_invitations.any? %>
         <% @pending_invitations.each do |invitation| %>
           <div class="invitation-card">
             <%= user_avatar invitation.inviter, class: "ring-avatar ring-avatar-sm" %>
@@ -57,6 +57,7 @@
             </div>
           </div>
         <% end %>
+        <%= render partial: "shared/event_invitation", collection: @event_invitations, as: :invitation %>
       <% else %>
         <p class="text-dim">No pending invites.</p>
       <% end %>

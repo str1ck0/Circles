@@ -22,4 +22,21 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Secret Society"
     assert_includes response.body, "invited you to <strong>Book Club</strong>"
   end
+
+  test "unanswered invitations appear separately from plans and declined events are excluded" do
+    invited = create_event(host: @veteran, attendees: [@newcomer], title: "Invitation awaiting reply")
+    declined = create_event(host: @veteran, attendees: [@newcomer], title: "Declined event")
+    declined.rsvp_of(@newcomer).update!(status: :declined)
+    sign_in @newcomer
+    get dashboard_path(@newcomer)
+    assert_response :success
+    assert_select ".dash-next", count: 0
+    assert_select ".event-invitation", text: /Invitation awaiting reply/
+    assert_not_includes response.body, "Declined event"
+
+    invited.rsvp_of(@newcomer).update!(status: :going)
+    get dashboard_path(@newcomer)
+    assert_select ".dash-next a[href='#{event_path(invited)}']"
+    assert_select ".event-invitation", count: 0
+  end
 end

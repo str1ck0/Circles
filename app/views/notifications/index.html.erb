@@ -21,6 +21,11 @@
     <% end %>
   <% end %>
 
+  <% if @event_invitations.any? %>
+    <h2 class="section-title">Event invitations</h2>
+    <%= render partial: "shared/event_invitation", collection: @event_invitations, as: :invitation %>
+  <% end %>
+
   <h2 class="section-title">Activity</h2>
   <% if @notifications.empty? %>
     <p class="text-dim">Nothing yet. Join a circle or RSVP to an event and it'll show up here.</p>

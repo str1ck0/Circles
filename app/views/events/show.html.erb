@@ -28,10 +28,10 @@
       <% end %>
     </div>
 
-    <div class="event-hero-body" data-controller="rsvp" data-rsvp-url-value="<%= event_user_events_url(@event) %>">
+    <div class="event-hero-body">
       <div class="event-hero-text">
         <p class="eyebrow">
-          <%= @event.start_date.strftime("%A, %-d %B") %>
+          <%= @event.start_date.strftime("%A, %-d %B · %H:%M %Z") %>
           <% if @circles.any? %> · <%= @circles.map(&:name).join(", ") %><% end %>
         </p>
         <h1><%= @event.title %></h1>
@@ -39,8 +39,8 @@
           <span><i class="fa-solid fa-location-dot"></i> <%= @event.location %></span>
           <span>
             <i class="fa-solid fa-user-group"></i>
-            <span data-rsvp-target="count" data-status="going"><%= @rsvp_counts["going"] %></span> going ·
-            <span data-rsvp-target="count" data-status="maybe"><%= @rsvp_counts["maybe"] %></span> maybe
+            <span><%= @rsvp_counts["going"] %></span> going ·
+            <span><%= @rsvp_counts["maybe"] %></span> maybe
           </span>
           <span><i class="fa-solid <%= @event.private? ? 'fa-lock' : 'fa-unlock' %>"></i> <%= @event.private? ? "Private" : "Open to the circle" %></span>
         </p>
@@ -50,13 +50,15 @@
           <p class="eyebrow"><%= event_policy.update? ? "You're hosting" : "Are you in?" %></p>
           <div class="rsvp-group" role="group" aria-label="RSVP">
             <% { "going" => "Going", "maybe" => "Maybe", "declined" => "Can't go" }.each do |status, label| %>
-              <button type="button"
-                      class="rsvp-button <%= 'is-active' if @user_event&.status == status %>"
-                      data-rsvp-target="button"
-                      data-status="<%= status %>"
-                      data-action="click->rsvp#choose"><%= label %></button>
+              <%= button_to label, event_user_events_path(@event),
+                            params: { user_event: { status: status } },
+                            class: "rsvp-button #{'is-active' if @user_event&.status == status}",
+                            aria: { pressed: @user_event&.status == status } %>
             <% end %>
           </div>
+          <% if event_policy.invite? %>
+            <%= link_to "Invite people", new_event_event_invitation_path(@event), class: "btn-accent btn-sm" %>
+          <% end %>
           <% if event_policy.update? %>
             <%= link_to edit_event_path(@event), class: "btn-ghost btn-sm event-hero-edit" do %><i class="fa-solid fa-pen"></i> Edit event<% end %>
           <% end %>
@@ -180,11 +182,11 @@
           </div>
           <div>
             <dt>Starts</dt>
-            <dd><%= @event.start_date.strftime("%a %-d %b %Y") %></dd>
+            <dd><%= @event.start_date.strftime("%a %-d %b %Y · %H:%M %Z") %></dd>
           </div>
           <div>
             <dt>Ends</dt>
-            <dd><%= @event.end_date.strftime("%a %-d %b %Y") %></dd>
+            <dd><%= @event.end_date.strftime("%a %-d %b %Y · %H:%M %Z") %></dd>
           </div>
           <div>
             <dt>Visibility</dt>
@@ -225,16 +227,7 @@
         <% end %>
       </div>
 
-      <% if event_policy.attach_circle? && @attachable_circles.any? %>
-        <div class="side-panel">
-          <div class="chat-panel-header"><h2>Invite a circle</h2></div>
-          <p class="text-dim side-panel-lede">Everyone in the circle lands on the guest list as invited.</p>
-          <%= simple_form_for [@event, @circle_event] do |f| %>
-            <%= f.association :circle, as: :radio_buttons, required: false, label: false, collection: @attachable_circles, item_wrapper_class: "form-check circle-choice" %>
-            <%= f.button :submit, "Add circle", class: "btn-ghost btn-sm" %>
-          <% end %>
-        </div>
-      <% end %>
+
     </aside>
   </div>
 

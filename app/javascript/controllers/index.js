@@ -22,8 +22,6 @@ application.register("friend", FriendController)
 import MapController from "./map_controller"
 application.register("map", MapController)
 
-import RsvpController from "./rsvp_controller"
-application.register("rsvp", RsvpController)
 
 import SearchUsersController from "./search_users_controller"
 application.register("search-users", SearchUsersController)
