@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   resources :events, only: %i[new create edit update destroy show] do
     resources :user_events, only: %i[create]
     resources :event_messages, only: %i[create]
-    resources :circle_events, only: %i[create]
+    resources :event_invitations, only: %i[new create]
     resources :event_playlists, only: %i[create]
     resources :payments, only: %i[new create]
   end

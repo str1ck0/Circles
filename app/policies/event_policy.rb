@@ -22,7 +22,7 @@ class EventPolicy < ApplicationPolicy
   def chat?           = attendee?
   def add_playlist?   = attendee?
   def add_payment?    = attendee?
-  def attach_circle?  = attendee?
+  def invite?         = host?
 
   def attendee?
     user.present? && record.attendee?(user)

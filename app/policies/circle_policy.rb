@@ -19,7 +19,6 @@ class CirclePolicy < ApplicationPolicy
   def chat?          = member?
   def add_playlist?  = member?
   def create_event?  = member?
-  def attach_event?  = member?
 
   def member?
     user.present? && record.member?(user)

@@ -51,6 +51,13 @@
   form { margin: 0; }
 }
 
+.event-invitation {
+  flex-wrap: wrap;
+
+  p { flex-basis: 180px; }
+  a { color: var(--text); }
+}
+
 .unread-badge {
   display: inline-block;
   min-width: 20px;

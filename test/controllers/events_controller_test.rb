@@ -32,29 +32,65 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
-  test "the host sees the chat, splitty and circle-invite controls" do
+  test "the host sees the chat, splitty and individual invitation controls" do
     create_circle(owner: @host, private: true)
     sign_in @host
     get event_path(@event)
     assert_response :success
     assert_includes response.body, "EventChatroomChannel"
     assert_includes response.body, "Splitty"
-    assert_includes response.body, "Invite a circle"
+    assert_includes response.body, "Invite people"
   end
 
-  test "creating an event ignores circles the creator doesn't belong to and enrols members" do
+  test "creating a circle event does not automatically invite any members" do
     sign_in @host
     assert_difference "Event.count", 1 do
-      post events_path, params: { event: {
-        title: "Picnic", location: "Berlin", start_date: 1.week.from_now, end_date: 8.days.from_now,
-        private: false, circle_ids: [@circle.id, @foreign_circle.id]
-      } }
+      assert_difference "UserEvent.count", 1 do
+        assert_no_difference "Notification.count" do
+          post events_path, params: { event: {
+            title: "Chess", location: "Berlin", start_date: 1.week.from_now, end_date: 8.days.from_now,
+            private: false, organising_circle_id: @circle.id
+          } }
+        end
+      end
     end
     event = Event.order(:id).last
     assert_equal [@circle], event.circles
     assert event.rsvp_of(@host).going?
-    assert event.rsvp_of(@circle_member).invited?
-    assert_not event.attendee?(@stranger)
+    assert_not event.attendee?(@circle_member)
+    assert EventPolicy.new(@circle_member, event).show?
+  end
+
+  test "an event cannot be placed in someone else's circle" do
+    sign_in @host
+    assert_no_difference "Event.count" do
+      assert_raises(ActiveRecord::RecordNotFound) do
+        post events_path, params: { event: {
+          title: "Chess", location: "Berlin", start_date: 1.week.from_now, end_date: 8.days.from_now,
+          organising_circle_id: @foreign_circle.id
+        } }
+      end
+    end
+  end
+
+  test "standalone events are invitation-only even if public is submitted" do
+    sign_in @host
+    post events_path, params: { event: {
+      title: "Chess", location: "Berlin", start_date: 1.week.from_now, end_date: 8.days.from_now, private: false
+    } }
+    event = Event.order(:id).last
+    assert_redirected_to event_path(event)
+    assert event.private?
+    assert_empty event.circles
+    patch event_path(event), params: { event: { private: false } }
+    assert event.reload.private?
+  end
+
+  test "starting an event from a circle preselects that circle" do
+    sign_in @host
+    get new_circle_event_path(@circle)
+    assert_response :success
+    assert_select "select[name='event[organising_circle_id]'] option[selected][value='#{@circle.id}']"
   end
 
   test "the host can open the edit form and sees a delete control" do
@@ -115,5 +151,23 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     patch event_path(@event), params: { event: { title: "Renamed" } }
     assert_redirected_to event_path(@event)
     assert_equal "Renamed", @event.reload.title
+  end
+
+  test "invalid event dates are rejected on creation and editing" do
+    sign_in @host
+    starts_at = 1.week.from_now
+    assert_no_difference ["Event.count", "UserEvent.count", "Notification.count"] do
+      post events_path, params: { event: {
+        title: "Chess", location: "Berlin", start_date: starts_at,
+        end_date: starts_at - 1.hour, organising_circle_id: @circle.id
+      } }
+    end
+    assert_response :unprocessable_entity
+    assert_includes response.body, "must be after the start time"
+
+    previous_end = @event.end_date
+    patch event_path(@event), params: { event: { end_date: @event.start_date - 1.hour } }
+    assert_response :unprocessable_entity
+    assert_equal previous_end, @event.reload.end_date
   end
 end

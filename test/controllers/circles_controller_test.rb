@@ -47,6 +47,34 @@ class CirclesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "circle pages hide unauthorized event cards and memories" do
+    [@public_circle, @private_circle].each do |circle|
+      event = create_event(host: @owner, circles: [circle], private: true,
+                           title: "Secret tournament", location: "Secret venue")
+      event.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "secret.png", content_type: "image/png")
+      sign_in(circle.private? ? @member : @stranger)
+      get circle_path(circle)
+      assert_response :success
+      assert_select "a[href='#{event_path(event)}']", count: 0
+      assert_not_includes response.body, "Secret tournament"
+      assert_not_includes response.body, "SECRET TOURNAMENT"
+      assert_not_includes response.body, "Secret venue"
+
+      sign_in @owner
+      get circle_path(circle)
+      assert_response :success
+      assert_select "a[href='#{event_path(event)}']", minimum: 1
+    end
+  end
+
+  test "members still see circle events they are eligible to join" do
+    event = create_event(host: @owner, circles: [@private_circle])
+    sign_in @member
+    get circle_path(@private_circle)
+    assert_response :success
+    assert_select "a[href='#{event_path(event)}']", minimum: 1
+  end
+
   test "the new circle form renders with the invite picker" do
     sign_in @stranger
     get new_circle_path

@@ -28,8 +28,8 @@ split the bill — without the group-chat chaos.
 |---|---|
 | 👥 **Circles** | Open clubs anyone can join, or private circles that are invite-only. Each has a photo, banner and its own ring colour. Members can leave; owners can remove people. |
 | ✉️ **Invitations** | Members invite people in-app (with a notification to accept or decline) or share a 7-day invite link. |
-| 📅 **Events** | Plan events for one or more circles — everyone in those circles lands on the guest list. Dates, location, photos. Hosts can edit or delete. |
-| ✅ **RSVPs** | Going / Maybe / Can't go, with live counts and a guest list grouped by answer. |
+| 📅 **Events** | Plan an event in an organising circle, or an invitation-only meetup. Hosts invite individual people; circle members are never automatically enrolled. Dates, times, location and photos. |
+| ✅ **RSVPs** | Going / Maybe / Can't go, with Turbo forms that refresh counts, guest lists and chat access together. |
 | 💬 **Real-time chat** | A chat room in every circle and event over Action Cable — members only. |
 | 🔔 **Notifications** | Invites, new events, RSVPs on your events, people joining your circle. Unread badge in the sidebar. |
 | 🗺️ **Maps** | Locations are geocoded and shown on a Mapbox map. |
@@ -67,6 +67,7 @@ Chat works locally with no Redis (the `async` adapter); production needs `REDIS_
 
 ```bash
 bin/rails test                # policy, controller, channel and model tests
+bin/rails test:system         # invitation and RSVP journey in headless Chrome
 ```
 
 ## Deployment

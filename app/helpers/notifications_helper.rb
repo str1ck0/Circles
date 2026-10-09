@@ -7,6 +7,7 @@ module NotificationsHelper
     when :circle_invitation   then "#{actor} invited you to join #{subject.circle.name}"
     when :invitation_accepted then "#{actor} accepted your invite to #{subject.circle.name}"
     when :event_created       then "#{actor} invited you to #{subject.title}"
+    when :event_invitation    then "#{actor} invited you to #{subject.event.title}"
     when :rsvp                then "#{actor} is going to #{subject.event.title}"
     when :circle_joined       then "#{actor} joined #{subject.circle.name}"
     end

@@ -23,7 +23,7 @@ class CirclesController < ApplicationController
   def show
     @circle = Circle.find(params[:id])
     authorize @circle
-    events = @circle.events.includes(:user_events, photos_attachments: :blob).order(:start_date)
+    events = policy_scope(@circle.events).includes(:user_events, photos_attachments: :blob).order(:start_date)
     @upcoming_events = events.select { |event| event.end_date >= Time.current }
     @memory_events = events.select { |event| event.photos.attached? }
     @memberships = @circle.user_circles.joins(:user).includes(user: { photo_attachment: :blob }).order("users.first_name")

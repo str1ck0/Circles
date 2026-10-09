@@ -31,7 +31,7 @@
           <button type="button" class="btn-ghost" data-bs-toggle="modal" data-bs-target="#inviteModal"><i class="fa-solid fa-user-plus"></i> Invite friends</button>
         <% end %>
         <% if circle_policy.create_event? %>
-          <%= link_to new_event_path, class: "btn-accent" do %><i class="fa-regular fa-calendar-plus"></i> Create event<% end %>
+          <%= link_to new_circle_event_path(@circle), class: "btn-accent" do %><i class="fa-regular fa-calendar-plus"></i> Create event<% end %>
         <% end %>
         <% if circle_policy.leave? %>
           <%= button_to circle_user_circle_path(@circle, @circle.user_circles.find_by(user: current_user)), method: :delete, class: "btn-quiet btn-sm",
@@ -59,7 +59,7 @@
             <h3>Nothing planned yet</h3>
             <% if circle_policy.create_event? %>
               <p>Be the one who gets everyone together.</p>
-              <%= link_to "Create an event", new_event_path, class: "btn-ghost btn-sm" %>
+              <%= link_to "Create an event", new_circle_event_path(@circle), class: "btn-ghost btn-sm" %>
             <% else %>
               <p>Events will show up here once members plan something.</p>
             <% end %>

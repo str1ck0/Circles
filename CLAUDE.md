@@ -74,7 +74,12 @@ policy's `chat?` allows. Semantics: `private: false` circles are public clubs (v
 all, one-click join); private ones are members-only. An event is visible to attendees and,
 unless private, to members of its attached circles. "Attendee" means *any* row on
 `user_events` regardless of its RSVP `status` (`invited`/`going`/`maybe`/`declined`) —
-the guest list is the access list.
+the guest list is the access list for viewing/chat/expenses. Hosts invite individual users
+through `EventInvitationsController`; creating an event never automatically enrols circle
+members. New events have at most one optional organising circle; events without a circle
+are invitation-only. Legacy multi-circle associations are retained for existing data.
+The bulk circle-attachment endpoint has been removed. Circle pages must apply the event policy scope
+to both event cards and memories, even after authorizing the circle itself.
 
 **Invitations and notifications.** Joining a private circle happens through an
 `Invitation` — personal (one-shot, accept/decline from `/notifications`) or link
@@ -101,6 +106,12 @@ an event (or a guest) raises a FK violation — it was latent until event deleti
 `PaymentsController#create`, wrapped in a transaction; the payer absorbs the integer
 remainder so balance changes always sum to zero.
 
+**Event invitations** use `UserEvent` with status `invited`, plus an `event_invitation`
+notification. `Event#invite!` uses a transaction and event lock to make repeated invitations
+idempotent. RSVP is the response; there is no separate acceptance state. Invitation does
+not create circle membership. RSVP buttons submit Turbo forms so the entire event view
+reflects updated permissions and guest counts.
+
 **Real-time chat** uses the in-process `async` adapter in development, so it works with no
 Redis running. Production needs `REDIS_URL` *and* `APP_HOST` — the latter feeds
 `config.action_cable.allowed_request_origins` in `config/environments/production.rb`, and
@@ -110,6 +121,11 @@ chat silently fails to connect without it.
 
 `bin/rails test` should be green. Coverage is concentrated where the risk is: policy
 tests, controller tests for every guarded path, channel tests, and the payment split.
+Browser coverage lives in `test/system`; run `bin/rails test:system` with Chrome installed.
+Selenium Manager downloads a matching driver on first use (network access required).
+Capybara 3.40 and Selenium 4.27 are pinned for compatibility with Ruby 3.1; revisit Selenium
+when upgrading Ruby.
+
 Build records with the helpers in `test/test_helper.rb` (`create_user`, `create_circle`,
 `create_event`) — circles need a photo *and* banner attached to be valid, and the helpers
 handle that with `test/fixtures/files/avatar.png`. Geocoder is stubbed globally.

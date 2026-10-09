@@ -6,7 +6,8 @@ class DashboardController < ApplicationController
 
     @circles = current_user.circles.includes(:users, photo_attachment: :blob).order(:name)
 
-    my_events = current_user.events.includes(:user_events, photos_attachments: :blob)
+    planned_ids = current_user.user_events.where(status: %i[going maybe]).select(:event_id)
+    my_events = current_user.events.where(id: planned_ids).includes(:user_events, photos_attachments: :blob)
     @upcoming_events = my_events.where("end_date >= ?", Time.current).order(:start_date).limit(8).to_a
     @next_event = @upcoming_events.first
     @next_rsvp = @next_event&.rsvp_of(current_user)
@@ -18,6 +19,7 @@ class DashboardController < ApplicationController
                        .order(:start_date).limit(8)
 
     @pending_invitations = current_user.received_invitations.active.includes(:circle, :inviter)
+    @event_invitations = current_user.user_events.upcoming_invitations
     @friends = current_user.friends.includes(photo_attachment: :blob).order(:first_name).limit(12)
     @playlists = CirclePlaylist.where(circle_id: current_user.circle_ids).includes(:circle).order(created_at: :desc).limit(4)
   end

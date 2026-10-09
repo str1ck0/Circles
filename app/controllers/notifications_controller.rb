@@ -3,6 +3,7 @@ class NotificationsController < ApplicationController
   after_action :skip_authorization
 
   def index
+    @event_invitations = current_user.user_events.upcoming_invitations
     @pending_invitations = current_user.received_invitations.active.includes(:circle, :inviter)
     @notifications = current_user.notifications.recent.includes(:actor, :notifiable).limit(50).to_a
     current_user.notifications.unread.update_all(read_at: Time.current)
